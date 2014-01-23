@@ -1,0 +1,271 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>理财后台管理</title>
+<link href="lib/bootstrap/css/bootstrap.css" rel="stylesheet">
+<link href="lib/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/style.css" type="text/css" rel="stylesheet" />
+<link href="lib/jqueryui/css/jquery.ui.theme.css" type="text/css" rel="stylesheet" />
+<link href="lib/jqueryui/css/jquery.ui.core.css" type="text/css" rel="stylesheet" />
+<link href="lib/jqueryui/css/jquery.ui.datepicker.css" type="text/css" rel="stylesheet" />
+<link href="lib/jqueryui/css/jquery.ui.all.css" type="text/css" rel="stylesheet">
+</head>
+
+<body>
+<div class="finance_head">
+	<img src="images/finance_logo.jpg" />
+	<ul id="menu">
+		<li><a href="javascript:turnpage('index.html');">顾问列表</a></li> 
+        <li><a href="javascript:turnpage('system_adduser.html');">渠道管理</a></li>
+         <li><a href="javascript:turnpage('chart_all.html');">统计分析</a></li>
+        <li><a href="javascript:turnpage('account.html');">账号管理</a></li>
+    </ul>
+    <span><a href="login.html" target="_self">[退出]</a></span>
+</div>
+
+<div class="finance_body">
+	<h1></h1>
+   <div class="finance_search">
+        <p><label for="timefrom">时间选择：</label> <input type="text" id="timefrom" class="input-small" /> 至 <input type="text" id="timeto" class="input-small" /></p>
+        <div><input type="button" value="搜索" id="btnsearch" class="in_but" /></div>
+    </div>
+  <input type="hidden" id="consultantid"/>
+  <input type="hidden" id="accountid"/> 
+	<div id="allmap" class="finance_map"></div>
+</div>
+
+<div class="finance_foot">COPYRIGHT© 2013 景淳投资管理</div>
+
+
+<script type="text/javascript" src="lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="lib/jqueryui/js/jquery.ui.datepicker.min.js"></script>
+<script type="text/javascript" src="lib/jqueryui/js/jquery.ui.datepicker-zh-CN.min.js"></script>
+<script type="text/javascript" src="lib/jqueryui/js/jquery.ui.core.min.js"></script>
+<script type="text/javascript" src="js/date.select.js"></script>
+
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=E3c8b2fe95573a5ce23f26852c386931"></script>
+<script type="text/javascript">
+
+function GetQueryString(name) 
+{ 
+var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)"); 
+var r = window.location.search.substr(1).match(reg); 
+if (r!=null) return unescape(r[2]); return null; 
+}  
+
+function consultant(){
+	   var consultantid=document.getElementById("consultantid").value;
+	   $.ajax({
+	        type:'GET',
+	        contentType:'application/json',
+	        url:"/kingstone/consultant/webconsultantinfo?consultantid="+consultantid,
+	        dataType: "json",
+	        success: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	          if(result.status==1){
+	            alert(result.msg);
+	            
+	          }else if(result.status==0){
+	           var item=result.item;
+	           $("h1").text(item.name+"的活动轨迹");
+	          }
+	        },
+	        error: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	            alert(result.msg);
+	        }
+	      });
+	}
+
+function route(){
+	   var timefrom=$("#timefrom").val();
+	   var timeto=$("#timeto").val();
+	   if(timefrom==null||timefrom==""){
+		   alert("请选择开始日期");
+		   return;
+	   }
+	   
+	   if(timeto==null||timeto==""){
+		   alert("请选择结束日期");
+		   return;
+	   }
+	   
+	   var consultantid=document.getElementById("consultantid").value;
+	   $.ajax({
+	        type:'GET',
+	        contentType:'application/json',
+	        url:"/kingstone/consultant/route?consultantid="+consultantid+"&timefrom="+timefrom+"&timeto="+timeto,
+	        dataType: "json",
+	        success: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	          if(result.status==1){
+	            alert(result.msg);
+	            handleitems(result.items);
+	          }else if(result.status==0){
+	           var items=result.items;
+	       	   handleitems(items);
+	          }
+	        },
+	        error: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	            alert(result.msg);
+	            
+	        }
+	      });
+	}
+$(function(){
+	  var consultantid=GetQueryString('consultantid');
+	  var accountid=GetQueryString('accountid');
+	  document.getElementById("consultantid").value=consultantid;
+	  document.getElementById("accountid").value=accountid;
+	  consultant();
+	  initMenu();
+	  $("#btnsearch").click(function(){
+		  route();
+	  });
+	  
+	})
+
+	
+	
+
+// 百度地图API功能
+
+ function initMenu(){
+	   var accountid=document.getElementById("accountid").value;
+	   
+	   $.ajax({
+	        type:'GET',
+	        contentType:'application/json',
+	        url:"/kingstone/group/initmenu?accountid="+accountid,
+	        dataType: "json",
+	        success: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	          if(result.status==1){
+	            alert(result.msg);
+	        	handlemenu(result.items);
+	          }else if(result.status==0){
+	           var items=result.items;
+	           handlemenu(result.items);
+	          }
+	        },
+	        error: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	            alert(result.msg);
+	            
+	        }
+	      });
+}
+
+function handlemenu(items){
+	
+	var menuli=$("#menu");
+	menuli.html("");
+	var li="";
+	 
+	for(i=0;i<items.length;i++)
+	{
+	  if(items[i].value=="index.html"){
+		  
+	  li+="<li class=\"select\"><a href=\"javascript:turnpage('"+items[i].value+"');\">"+items[i].key+"</a></li>"; 
+	  }else{
+		  li+="<li><a href=\"javascript:turnpage('"+items[i].value+"');\">"+items[i].key+"</a></li>"; 
+	  }
+	}
+	menuli.html(li);
+}
+
+function handleitems(items){
+	mp.clearOverlays();
+	for (var i = 0; i < items.length; i ++) {
+		var data = items[i].location.split("\,");
+		var generatetime = items[i].generatetime;
+		var x = data[0];
+		var y = data[1];
+		var myCompOverlay = new ComplexCustomOverlay(
+			new BMap.Point(x,y),
+			"",
+			generatetime
+		);
+		mp.addOverlay(myCompOverlay);
+	}
+
+	
+}
+
+var mp = new BMap.Map("allmap");
+var point = new BMap.Point(116.404, 39.915);
+var gc = new BMap.Geocoder();
+
+mp.centerAndZoom(point, 12);
+mp.enableScrollWheelZoom(true);
+
+function ComplexCustomOverlay(point, text, mouseoverText){
+	this._point = point;
+	this._text = text;
+	this._overText = mouseoverText;
+}
+ComplexCustomOverlay.prototype = new BMap.Overlay();
+ComplexCustomOverlay.prototype.initialize = function(map){
+	this._map = map;
+	var div = this._div = document.createElement("div");
+	div.style.position = "absolute";
+	div.style.zIndex = BMap.Overlay.getZIndex(this._point.lat);
+	div.style.height = "23px";
+	div.style.width = "19px";
+	div.style.background = "url(images/point.png) no-repeat";
+	div.style.padding = "2px 4px";
+	div.style.lineHeight = "18px";
+	div.style.whiteSpace = "nowrap";
+	div.style.MozUserSelect = "none";
+	div.style.fontSize = "12px";
+	div.style.borderRadius="5px";
+	var span = this._span = document.createElement("span");
+	span.style.position = "absolute";
+	span.style.display = "none";
+	span.style.height = "18px";
+	span.style.padding = "2px 4px";
+	span.style.lineHeight = "18px";
+	span.style.backgroundColor = "#EE5D5B";
+	span.style.top = "-26px";
+	span.style.left = "-50px";
+	span.style.color = "white";
+	span.style.borderRadius = "3px";
+	div.appendChild(span);
+	span.appendChild(document.createTextNode(this._text));      
+	var that = this;
+	
+	div.onmouseover = function(){
+		this.getElementsByTagName("span")[0].innerHTML = that._overText;
+		span.style.display = "block";
+	}
+	
+	div.onmouseout = function(){
+		this.getElementsByTagName("span")[0].innerHTML = "";
+		span.style.display = "none";
+	}
+	
+	mp.getPanes().labelPane.appendChild(div);
+	
+	return div;
+}
+
+ComplexCustomOverlay.prototype.draw = function(){
+	var map = this._map;
+	var pixel = map.pointToOverlayPixel(this._point);
+	this._div.style.left = pixel.x + "px";
+	this._div.style.top  = pixel.y + "px";
+}
+
+function turnpage(page){
+	var accountid=$("#accountid").val();
+	window.location.href=page+"?accountid="+accountid;
+}
+ 
+
+ 
+
+</script>
+</body>
+</html>

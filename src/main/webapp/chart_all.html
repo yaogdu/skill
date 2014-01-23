@@ -1,0 +1,405 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>理财后台管理</title>
+<link href="lib/bootstrap/css/bootstrap.css" rel="stylesheet">
+<link href="css/style.css" type="text/css" rel="stylesheet" />
+<link href="lib/plugins/css/jquery.jqplot.css" type="text/css" rel="stylesheet" />
+
+<link href="lib/jqueryui/css/jquery.ui.theme.css" type="text/css" rel="stylesheet" />
+<link href="lib/jqueryui/css/jquery.ui.core.css" type="text/css" rel="stylesheet" />
+<link href="lib/jqueryui/css/jquery.ui.datepicker.css" type="text/css" rel="stylesheet" />
+<link href="lib/jqueryui/css/jquery.ui.all.css" type="text/css" rel="stylesheet">
+</head>
+
+<body>
+<div class="finance_head">
+	<img src="images/finance_logo.jpg" />
+	<ul id="menu">
+       <li><a href="javascript:turnpage('index.html');">顾问列表</a></li> 
+        <li><a href="javascript:turnpage('system_adduser.html');">统计管理</a></li>
+         <li class="select"><a href="javascript:turnpage('chart_all.html');">统计分析</a></li>
+        <li ><a href="javascript:turnpage('account.html');">账号管理</a></li>
+        
+     
+    </ul>
+   <span id="loginid"><a href="login.html" target="_self">[退出]</a></span>
+</div>
+
+<div class="finance_body">
+	<div class="finance_chart_class cle">
+      <input type="hidden" id="accountid"/>
+      <input type="hidden" id="consultantid"/>
+      <input type="hidden" id="pageNo" value="1"/>
+         <a href="javascript:turnpage('chart_all.html');" class="in_but select">工作量统计</a>
+        <a href="javascript:turnpage('chart_operations.html');" class="in_but">运营统计</a>
+        <a href="javascript:turnpage('chart_client.html');" class="in_but">客户资料</a>
+         <a href="javascript:turnpage('workforce.html');" class="in_but">成果统计</a>
+    </div>
+    <form>
+    <div class="finance_search">
+        <p>
+            <label>关键字：</label>
+            <input type="text" id="idsearch" size="22" placeholder="姓名、编号" readonly="readonly" />
+        </p>
+        <p>
+        	<label for="timefrom">时间选择：</label> <input type="text" id="timefrom" class="input-small" /> 至 <input type="text" id="timeto" class="input-small" />
+        </p>
+        <div> <input type="button" id="btnselect" value="选择顾问" class="in_but" /> <input type="button" value="清除" class="in_but" id="clear"/> <input type="button" id="search" value="搜索" class="in_but" /></div>
+    </div>
+    </form>
+	<div class="cle">
+        <div id="all" class="finance_chart_all"></div>
+    </div>
+</div>
+
+<!-- select consultant -->
+<div id="selectconsultant" class="modal hide fade text-left" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <span class="lead"></span>
+    </div>
+    <div class="modal-body">
+       
+            <div class="finance_search" style=" margin:0 auto;">
+                <p>
+                    <label for="key">关键字：</label>
+                    <input type="text" size="22" id="namesearch" class="input-medium" placeholder="姓名" /> 
+                </p>
+                 
+                <div><input type="button" value="搜索" class="in_but" onclick="consultants(1);"/> </div>
+            </div>
+         
+        <table border="0" cellspacing="1" cellpadding="0" class="finance_list table-hover" align="center"  id="consultantlist">
+            <tr>
+              <th>选择</th>
+                <th>姓名</th>
+                <th>编号</th>
+                
+            </tr>
+            <tr>
+              <td colspan="6">加载中...</td>
+            </tr>
+        </table>
+        <div class="finance_page cle">
+            <div class="finance_page_r">
+                <a class="n" href="javascript:prePage();">&lt;上一页</a> <strong>第<span id="currentPage">1</span>页</strong> <strong>共<span id="totalPage">1</span>页</strong><a class="n" href="javascript:nextPage();">下一页&gt;</a>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+        <button class="btn btn-primary" id="saveconsultant">确定</button>
+    </div>
+</div>
+
+
+<div class="finance_foot">COPYRIGHT© 2013 景淳投资管理</div>
+<script type="text/javascript" src="lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="lib/plugins/js/jquery.jqplot.js" ></script>
+<script type="text/javascript" src="lib/plugins/js/jqplot.pieRenderer.min.js" ></script>
+<script type="text/javascript" src="lib/plugins/js/jqplot.donutRenderer.min.js" ></script>
+
+<script type="text/javascript" src="lib/plugins/js/jqplot.barRenderer.min.js"></script>
+<script type="text/javascript" src="lib/plugins/js/jqplot.highlighter.min.js"></script>
+<script type="text/javascript" src="lib/plugins/js/jqplot.cursor.min.js"></script>
+<script type="text/javascript" src="lib/plugins/js/jqplot.pointLabels.min.js"></script>
+
+<script type="text/javascript" src="lib/plugins/js/jqplot.dateAxisRenderer.min.js"></script>
+
+<script type="text/javascript" src="lib/jqueryui/js/jquery.ui.datepicker.min.js"></script>
+<script type="text/javascript" src="lib/jqueryui/js/jquery.ui.datepicker-zh-CN.min.js"></script>
+<script type="text/javascript" src="lib/jqueryui/js/jquery.ui.core.min.js"></script>
+<script type="text/javascript" src="js/date.select.js"></script>
+
+<script type="text/javascript" src="lib/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+ 
+
+function handledata(items){
+	var turnover = [["11/2/2013", 152000], ["11/3/2013", 122000]];
+	var visit =  [["11/2/2013", 212000], ["11/3/2013", 222000]];
+	var turnoverRate = [["11/2/2013", 112400], ["11/3/2013", 113000]];
+	 $("#all").html("");
+	plot1 = $.jqplot("all", [items.increase, items.complete, items.visit], {
+		
+		grid: {
+            background: '#fff'
+        },
+		animate: true,
+		// Will animate plot on calls to plot1.replot({resetAxes:true})
+		animateReplot: true,
+		cursor: {
+			show: true,
+			zoom: true,
+			looseZoom: true,
+			showTooltip: false
+		},
+		series:[
+			{
+				label: '新增客户'
+			}, 
+			{
+				label: '成交客户'
+			},
+			{
+				label: '拜访量'
+			}
+		],
+		axesDefaults: {
+			pad: 0
+		},
+		axes: {
+			// These options will set up the x axis like a category axis.
+			xaxis: {
+				//renderer:$.jqplot.DateAxisRenderer,
+				//tickOptions:{formatString:"%Y/%#m/"},
+				angle: 15,
+				ticks: items.date
+			},
+			yaxis: {
+				tickOptions: {
+					//formatString: "%'d$"
+				},
+				rendererOptions: {
+					forceTickAt0: true
+				}
+			}
+		},
+		highlighter: {
+			show: true, 
+			showLabel: true, 
+			tooltipAxes: 'y',
+			sizeAdjust: 7.5 , tooltipLocation : 'ne'
+		},
+		legend: { 
+			show:true,
+			location: 'ws'
+	  	}
+	});
+  
+	}
+
+	$(function(){
+		var accountid=GetQueryString('accountid');
+		if(accountid==null||accountid==""){
+			alert("请先登录!");
+			window.location.href="login.html";
+			return;
+		}
+		$("#search").click(function(){
+			search();
+		});
+		
+		//handledata({"increase":[],"complete":[],"visit":[],"date":[]});
+		document.getElementById("accountid").value=accountid;
+		initMenu();
+		
+		$("#btnselect").click(function(){//show model dialog
+			consultants(1);
+			consultantmatch($("#selectMember input[type='radio']"),consultantval);
+			$("#selectconsultant input[type='radio']").bind("change",function(){
+				selectradio($(this));
+			})
+			$("#clear").click(function(){
+				consultantsave("","");
+			})
+			$('#selectconsultant').modal('show');
+		})
+		
+		$("#saveconsultant").click(function(){ //select consultant
+			//consultantsave("","");
+			$('#selectconsultant').modal('hide');
+			
+		})
+		
+	})
+	
+	function consultantsave(consultantval,idsearch){
+    	$("#idsearch").val(idsearch);
+    	$("#consultantid").val(consultantval);
+	}
+	
+	
+	
+	function selectradio(ele){
+		var obj=$(ele);
+	
+    	var objnext=obj.closest("td").next();
+    	var name = objnext.text();
+    	var no=objnext.closest("td").next().text();
+    	
+    	if(obj.is(":checked")){
+    		consultantval = obj.val();
+    	}
+    	
+    	var idsearch=name+"("+no+")";
+    	
+    	consultantsave(consultantval,idsearch);
+	}
+
+	
+	function consultantlist(items){
+		emptyTable("consultantlist");
+		for(var i=0;i<items.length;i++){
+			var item=items[i];
+			var newRow = "<tr><td><input type=\"radio\" id=\""+item.id+"\" onclick=\"javascript:selectradio(this);\" name=\"leader\" value=\""+item.id+"\" /></td><td>"+item.name+"</td><td>"+item.consultantno+"</td></tr>";
+			$("#consultantlist tr:last").after(newRow);
+		}
+		consultantmatch($("#selectconsultant input[type='radio']"),consultantval);
+	}
+	
+	function emptyTable(tableid){
+		var trslength= $("#"+tableid).find("tr").length;
+		for(var i=trslength;i>=1;i--) //保留最前面两行！
+		{
+		    $("#"+tableid).find("tr").eq(i).remove();
+		}
+	}
+    function consultantmatch(box,val){
+    	if(val){
+    		$(box).each(function(s){
+    			if(val == box.eq(s).val()){
+    				document.getElementById(val).checked=true;
+    			}
+    		})
+    	}
+    }
+	
+	function consultants(pageNo){
+	 
+	 document.getElementById("currentPage").innerHTML=pageNo;
+	 document.getElementById("pageNo").value=pageNo;
+	 $.ajax({
+	        type:'GET',
+	        contentType:'application/json',
+	        url:"/kingstone/consultant/chartlist?pageNo="+pageNo+"&pageSize=5&name="+encodeURI($("#namesearch").val())+"&accountid="+$("#accountid").val(),
+	        dataType: "json",
+	        success: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	          if(result.status==1){
+	            alert(result.msg);
+	        	consultantlist(result.items);
+	        	 
+	          }else if(result.status==0){
+	           var items=result.items;
+	           document.getElementById("totalPage").innerHTML=result.page;
+	           consultantlist(items);
+	          }
+	        },
+	        error: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	            alert(result.msg);
+	        }
+	       
+	 });
+	 document.getElementById("pageNo").value=pageNo;
+}
+ 
+	function search(){
+		 $.ajax({
+		        type:'GET',
+		        contentType:'application/json',
+		        url:"/kingstone/group/workeffort?accountid="+$("#accountid").val()+"&consultantid="+$("#consultantid").val()+"&timefrom="+$("#timefrom").val()+"&timeto="+$("#timeto").val(),
+		        dataType: "json",
+		        success: function(response){
+		          var result=JSON.parse(JSON.stringify(response));
+		          if(result.status==1){
+		            alert(result.msg);
+		        	handledata(result.items);
+		          }else if(result.status==0){
+		           var items=result.items;
+		           handledata(items);
+		          }
+		        },
+		        error: function(response){
+		          var result=JSON.parse(JSON.stringify(response));
+		            alert(result.msg);
+		        }
+		       
+		 });
+		 document.getElementById("pageNo").value=pageNo;
+	}
+	 
+	var consultantval="";
+	 
+	function GetQueryString(name) 
+	{ 
+	var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)"); 
+	var r = window.location.search.substr(1).match(reg); 
+	if (r!=null) return unescape(r[2]); return null; 
+	}  
+	 
+	function turnpage(page){
+		var accountid=$("#accountid").val();
+		window.location.href=page+"?accountid="+accountid;
+	}
+	function initMenu(){
+		   var accountid=document.getElementById("accountid").value;
+		   
+		   $.ajax({
+		        type:'GET',
+		        contentType:'application/json',
+		        url:"/kingstone/group/initmenu?accountid="+accountid,
+		        dataType: "json",
+		        success: function(response){
+		          var result=JSON.parse(JSON.stringify(response));
+		          if(result.status==1){
+		            alert(result.msg);
+		        	handlemenu(result.items);
+		          }else if(result.status==0){
+		           var items=result.items;
+		           handlemenu(result.items);
+		          }
+		        },
+		        error: function(response){
+		          var result=JSON.parse(JSON.stringify(response));
+		            alert(result.msg);
+		            
+		        }
+		      });
+	}
+
+	function handlemenu(items){
+		
+		var menuli=$("#menu");
+		menuli.html("");
+		var li="";
+		 
+		for(i=0;i<items.length;i++)
+		{
+		  if(items[i].value=="chart_all.html"){
+			  
+		  li+="<li class=\"select\"><a href=\"javascript:turnpage('"+items[i].value+"');\">"+items[i].key+"</a></li>"; 
+		  }else{
+			  li+="<li><a href=\"javascript:turnpage('"+items[i].value+"');\">"+items[i].key+"</a></li>"; 
+		  }
+		}
+		menuli.html(li);
+	}
+	
+	function nextPage(){
+		var pageNo=document.getElementById("pageNo").value;
+		var nextPage=parseInt(pageNo)+1;
+		var totalPage=document.getElementById("totalPage").innerHTML;
+		if(parseInt(totalPage)>=nextPage){
+    		document.getElementById("currentPage").innerHTML=nextPage;
+    		consultants(nextPage);
+		}
+	}
+	
+	function prePage(){
+		var pageNo=document.getElementById("pageNo").value;
+		var prePage=parseInt(pageNo)-1;
+		var totalPage=document.getElementById("totalPage").innerHTML;
+		if(parseInt(prePage)>0&&parseInt(totalPage)>0){
+			document.getElementById("currentPage").innerHTML=prePage;
+			consultants(prePage);
+		}
+	}
+
+</script>
+
+</body>
+</html>

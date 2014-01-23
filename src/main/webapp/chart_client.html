@@ -1,0 +1,572 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>理财后台管理</title>
+<link href="lib/bootstrap/css/bootstrap.css" rel="stylesheet">
+<link href="css/style.css" type="text/css" rel="stylesheet" />
+<link href="lib/plugins/css/jquery.jqplot.css" type="text/css" rel="stylesheet" />
+</head>
+
+<body>
+<div class="finance_head">
+	<img src="images/finance_logo.jpg" />
+	<ul id="menu">
+        <li><a href="javascript:turnpage('index.html');">顾问列表</a></li> 
+        <li><a href="javascript:turnpage('system_adduser.html');">渠道管理</a></li>
+         <li class="select"><a href="javascript:turnpage('chart_all.html');">统计分析</a></li>
+        <li ><a href="javascript:turnpage('account.html');">账号管理</a></li>
+    </ul>
+     <span id="loginid"><a href="login.html" target="_self">[退出]</a></span>
+</div>
+
+<div class="finance_body">
+	<div class="finance_chart_class cle">
+      <input type="hidden" id="accountid"/>
+      <input type="hidden" id="pageNo" value="1"/>
+         <a href="javascript:turnpage('chart_all.html');" class="in_but">工作量统计</a>
+        <a href="javascript:turnpage('chart_operations.html');" class="in_but">运营统计</a>
+        <a href="javascript:turnpage('chart_client.html');" class="in_but select">客户资料</a>
+        <a href="javascript:turnpage('workforce.html');" class="in_but">成果统计</a>
+    </div>
+    <form>
+    <div class="finance_search">
+        <p>
+            <label>渠道：</label>
+            <select id="district">
+            <option value=-1>全部</option>
+            <option value=0>上海</option>
+            <option value=1>香港</option>
+          </select>
+            
+            
+        </p>
+        <div><input type="button" id="btnsearch" value="搜索" class="in_but" /></div>
+    </div>
+    </form>
+	<div class="cle">
+         <div id="gender" class="finance_chart_client" style="border-width:0 1px 1px 0;"></div>
+        <div id="age" class="finance_chart_client" style="border-width:0 0 1px 0;"></div>
+        <div id="assets" class="finance_chart_client" style="border-width:0 1px 0 0;"></div>
+        <div id="jobs" class="finance_chart_client" style="height:500px;"></div>
+    </div>
+</div>
+
+<div class="finance_foot">COPYRIGHT© 2013 景淳投资管理</div>
+
+<!-- info -->
+<div id="info" class="modal hide fade text-left" tabindex="-1" role="dialog"  aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <span class="lead" id="condition"></span>
+    </div>
+    <div class="modal-body">
+    <span id="totalCount">共 0 个</span>
+      <table id="customertable" border="0"  cellspacing="1" cellpadding="0" class="finance_list table-hover" align="center">
+            <tr>
+                <th>姓名</th>
+                <th>联系电话</th>
+                <th>性别</th>
+                <th>出生日期</th>
+                <th>职业</th>
+                <th>是否成交</th>
+            </tr>
+             
+        </table>
+          <div class="finance_page">
+            <div class="finance_page_r">
+                 <a class="n" href="javascript:prePage();">&lt;上一页</a> <strong>第<span id="currentPage">1</span>页</strong> <strong>共<span id="totalPage">1</span>页</strong><a class="n" href="javascript:nextPage();">下一页&gt;</a>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+    </div>
+</div>
+<script type="text/javascript" src="lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="lib/plugins/js/jquery.jqplot.js" ></script>
+<script type="text/javascript" src="lib/plugins/js/jqplot.pieRenderer.min.js" ></script>
+<script type="text/javascript" src="lib/plugins/js/jqplot.donutRenderer.min.js" ></script>
+<script type="text/javascript" src="lib/plugins/js/jqplot.barRenderer.min.js"></script>
+<script type="text/javascript" src="lib/plugins/js/jqplot.highlighter.min.js"></script>
+<script type="text/javascript" src="lib/plugins/js/jqplot.cursor.min.js"></script>
+<script type="text/javascript" src="lib/plugins/js/jqplot.pointLabels.min.js"></script>
+
+<script type="text/javascript" src="lib/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+function handlefund(fund){
+  
+  
+  var assetsData = fund;
+  $("#assets").html("");
+  var assets = jQuery.jqplot ('assets', [assetsData], 
+    { 
+		grid: {
+            drawBorder: false, 
+            drawGridlines: false,
+            background: '#ffffff',
+            shadow:false
+        },
+      	seriesDefaults: {
+        // Make this a pie chart.
+        renderer: jQuery.jqplot.PieRenderer,
+        rendererOptions: {
+          // Put data labels on the pie slices.
+          // By default, labels show the percentage of the slice.
+          showDataLabels: true,
+		  sliceMargin: 4
+        }
+      }, 
+      legend: { 
+			show:true,
+			rendererOptions: {
+                numberRows: 2
+            }, 
+			location: 's'
+	  },
+	  title: "资产统计"
+    }
+  )
+}
+  
+function customer_gender(pageNo,clickindex){
+	   document.getElementById("currentPage").innerHTML=pageNo;
+	   document.getElementById("pageNo").value=pageNo;
+	   $.ajax({
+	        type:'GET',
+	        contentType:'application/json',
+	        url:"/kingstone/group/customer_gender?accountid="+$("#accountid").val()+"&groupid="+$("#district").val()+"&pageNo="+pageNo+"&pageSize=5&clickindex="+clickindex,
+	        dataType: "json",
+	        success: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	          if(result.status==1){
+	            alert(result.msg);
+	            handleitems(result.items);
+	          }else if(result.status==0){
+	           var items=result.items;
+	           document.getElementById("totalPage").innerHTML=result.page;
+	           document.getElementById("totalCount").innerHTML="共"+result.total+"个";
+	       	   handleitems(items);
+	          }
+	        },
+	        error: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	            alert(result.msg);
+	            
+	        }
+	      });
+	}
+	
+function customer_age(pageNo,clickindex){
+	   document.getElementById("currentPage").innerHTML=pageNo;
+	   document.getElementById("pageNo").value=pageNo;
+	   $.ajax({
+	        type:'GET',
+	        contentType:'application/json',
+	        url:"/kingstone/group/customer_age?accountid="+$("#accountid").val()+"&groupid="+$("#district").val()+"&pageNo="+pageNo+"&pageSize=5&clickindex="+clickindex,
+	        dataType: "json",
+	        success: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	          if(result.status==1){
+	            alert(result.msg);
+	            handleitems(result.items);
+	          }else if(result.status==0){
+	           var items=result.items;
+	           document.getElementById("totalPage").innerHTML=result.page;
+	           document.getElementById("totalCount").innerHTML="共"+result.total+"个";
+	       	   handleitems(items);
+	          }
+	        },
+	        error: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	            alert(result.msg);
+	            
+	        }
+	      });
+	}
+	
+function customer_asset(pageNo,clickindex){
+	   document.getElementById("currentPage").innerHTML=pageNo;
+	   document.getElementById("pageNo").value=pageNo;
+	   $.ajax({
+	        type:'GET',
+	        contentType:'application/json',
+	        url:"/kingstone/group/customer_asset?accountid="+$("#accountid").val()+"&groupid="+$("#district").val()+"&pageNo="+pageNo+"&pageSize=5&clickindex="+clickindex,
+	        dataType: "json",
+	        success: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	          if(result.status==1){
+	            alert(result.msg);
+	            handleitems(result.items);
+	          }else if(result.status==0){
+	           var items=result.items;
+	           document.getElementById("totalPage").innerHTML=result.page;
+	           document.getElementById("totalCount").innerHTML="共"+result.total+"个";
+	       	   handleitems(items);
+	          }
+	        },
+	        error: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	            alert(result.msg);
+	            
+	        }
+	      });
+	}
+
+function customer_jobs(pageNo,clickindex){
+	   document.getElementById("currentPage").innerHTML=pageNo;
+	   document.getElementById("pageNo").value=pageNo;
+	   $.ajax({
+	        type:'GET',
+	        contentType:'application/json',
+	        url:"/kingstone/group/customer_jobs?accountid="+$("#accountid").val()+"&groupid="+$("#district").val()+"&pageNo="+pageNo+"&pageSize=5&job="+clickindex,
+	        dataType: "json",
+	        success: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	          if(result.status==1){
+	            alert(result.msg);
+	            handleitems(result.items);
+	          }else if(result.status==0){
+	           var items=result.items;
+	           document.getElementById("totalPage").innerHTML=result.page;
+	           document.getElementById("totalCount").innerHTML="共"+result.total+"个";
+	       	   handleitems(items);
+	          }
+	        },
+	        error: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	            alert(result.msg);
+	            
+	        }
+	      });
+	}
+
+function handleitems(items){ 
+	  emptyTable("customertable");
+	  for(var i=0;i<items.length;i++){
+	    var item=items[i];
+	    var gender=item.gender==0?"男":"女";  
+	    var done=item.done;
+	    var strDone="";
+	    var btnDone="";
+	    if(done==0){
+	    	strDone="未成交";
+	    }else if(done==1){
+	    	strDone="已成交";
+	    } 
+	     
+        var newRow = "<tr><td>"+item.name+"</td><td>"+item.mobile+"</td><td>"+gender+"</td><td>"+item.age+"</td><td>"+item.job+"</td><td>"+strDone+"</td></tr>";
+        $("#customertable tr:last").after(newRow);
+	  }
+	}
+
+function emptyTable(tableid){
+	  var trslength= $("#"+tableid).find("tr").length;
+	  for(var i=trslength;i>=1;i--) //保留最前面两行！
+	  {
+	      $("#"+tableid).find("tr").eq(i).remove();
+	  }
+	}
+
+	function nextPage(){
+	  var pageNo=document.getElementById("pageNo").value;
+	  var nextPage=parseInt(pageNo)+1;
+	  var totalPage=document.getElementById("totalPage").innerHTML;
+	  if(parseInt(totalPage)>=nextPage){
+	    document.getElementById("currentPage").innerHTML=nextPage;
+	    if("gender"==clickSrc){
+			customer_gender(nextPage,clickIndex);
+		}else if("age"==clickSrc){
+			customer_age(nextPage,clickIndex);
+		}else if("assets"==clickSrc){
+			customer_asset(nextPage,clickIndex);
+		}else if("jobs"==clickSrc){
+			customer_jobs(nextPage,clickIndex);
+		}
+	  }
+	   
+	}
+	function prePage(){
+	  var pageNo=document.getElementById("pageNo").value;
+	  var prePage=parseInt(pageNo)-1;
+	  var totalPage=document.getElementById("totalPage").innerHTML;
+	  if(parseInt(prePage)>0&&parseInt(totalPage)>0){
+	    document.getElementById("currentPage").innerHTML=prePage;
+	    if("gender"==clickSrc){
+			customer_gender(prePage,clickIndex);
+		}else if("age"==clickSrc){
+			customer_age(prePage,clickIndex);
+		}else if("assets"==clickSrc){
+			customer_asset(prePage,clickIndex);
+		}else if("jobs"==clickSrc){
+			customer_jobs(prePage,clickIndex);
+		}
+	  }
+	}
+function handleage(age){
+	var ageData =age;
+	$("#age").html("");
+	             var age = jQuery.jqplot ('age', [ageData], 
+	               { 
+	           		grid: {
+	                       drawBorder: false, 
+	                       drawGridlines: false,
+	                       background: '#ffffff',
+	                       shadow:false
+	                   },
+	                 	seriesDefaults: {
+	                   // Make this a pie chart.
+	                   renderer: jQuery.jqplot.PieRenderer,
+	                   rendererOptions: {
+	                     // Put data labels on the pie slices.
+	                     // By default, labels show the percentage of the slice.
+	                     showDataLabels: true,
+	           		  sliceMargin: 4
+	                   }
+	                 }, 
+	                 legend: { 
+	           			show:true,
+	           			rendererOptions: {
+	                           numberRows: 2
+	                       }, 
+	           			location: 's'
+	           	  },
+	           	  title: "年龄统计"
+	               }
+	             );
+	             
+}
+
+function handlejobs(jobs){
+	var jobsData =jobs;
+	$("#jobs").html("");
+	 
+	             var age = jQuery.jqplot ('jobs', [jobsData], 
+	               { 
+	           		grid: {
+	                       drawBorder: false, 
+	                       drawGridlines: false,
+	                       background: '#ffffff',
+	                       shadow:false
+	                   },
+	                 	seriesDefaults: {
+	                   // Make this a pie chart.
+	                   renderer: jQuery.jqplot.PieRenderer,
+	                   rendererOptions: {
+	                     // Put data labels on the pie slices.
+	                     // By default, labels show the percentage of the slice.
+	                     showDataLabels: true,
+	           		  sliceMargin: 4
+	                   }
+	                 }, 
+	                 legend: { 
+	           			show:true,
+	           			rendererOptions: {
+	                           numberRows: 3
+	                       }, 
+	           			location: 's'
+	           	  },
+	           	  title: "行业统计"
+	               }
+	             );
+	             
+}
+
+$(function(){
+	var accountid=GetQueryString('accountid');
+	if(accountid==null||accountid==""){
+		alert("请先登录!");
+		window.location.href="login.html";
+		return;
+	}
+	$("#btnsearch").click(function(){
+		groupanalysis();
+	});
+	document.getElementById("accountid").value=accountid;
+	$('#gender,#age,#assets,#jobs').bind('jqplotDataClick',function (ev, seriesIndex, pointIndex, data) {
+		var id=ev.currentTarget.attributes["id"].value;
+		emptyTable("customertable");
+		clickSrc=id;
+		clickIndex=pointIndex;
+		if("gender"==id){
+			customer_gender(1,pointIndex);
+		}else if("age"==id){
+			customer_age(1,pointIndex);
+		}else if("assets"==id){
+			customer_asset(1,pointIndex);
+		}else if("jobs"==id){
+			clickIndex=data[0];
+			customer_jobs(1,clickIndex);
+		}
+		
+		$("#condition").html(data[0]);
+		$('#info').modal('show');
+		//alert('series: '+seriesIndex+', point: '+pointIndex+', data: '+);
+	});
+  
+	initMenu();
+	initDistrict();
+	groupanalysis();
+})
+var clickSrc;
+var clickIndex;
+function groupanalysis(){
+	   var accountid=document.getElementById("accountid").value;
+	   var groupid=$("#district").val();
+	   $.ajax({
+	        type:'GET',
+	        contentType:'application/json',
+	        url:"/kingstone/group/clientanalysis?accountid="+accountid+"&groupid="+groupid,
+	        dataType: "json",
+	        success: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	          if(result.status==1){
+	            alert(result.msg);
+	          }else if(result.status==0){
+	           var sexual=result.sexual;
+	           handlesexual(sexual);
+	           handleage(result.age);
+	           handlefund(result.fund);
+	           handlejobs(result.jobs);
+	          }
+	        },
+	        error: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	            alert(result.msg);
+	            
+	        }
+	      });
+}
+
+function handlesexual(sexual){
+	  var genderData = sexual;
+	  $("#gender").html("");
+	  var gender = jQuery.jqplot ('gender', [genderData], 
+	    { 
+			grid: {
+	            drawBorder: false, 
+	            drawGridlines: false,
+	            background: '#ffffff',
+	            shadow:false
+	        },
+	      	seriesDefaults: {
+	        // Make this a pie chart.
+	        renderer: jQuery.jqplot.PieRenderer,
+	        rendererOptions: {
+	          // Put data labels on the pie slices.
+	          // By default, labels show the percentage of the slice.
+	          showDataLabels: true,
+			  sliceMargin: 4
+	        }
+	      }, 
+	      legend: { 
+				show:true,
+				rendererOptions: {
+	                numberRows: 2
+	            }, 
+				location: 's'
+		  },
+		  title: "性别统计"
+	    }
+	 );
+}
+
+function GetQueryString(name) 
+{ 
+var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)"); 
+var r = window.location.search.substr(1).match(reg); 
+if (r!=null) return unescape(r[2]); return null; 
+}  
+ 
+function turnpage(page){
+	var accountid=$("#accountid").val();
+	
+	window.location.href=page+"?accountid="+accountid;
+}
+
+function initMenu(){
+	   var accountid=document.getElementById("accountid").value;
+	   
+	   $.ajax({
+	        type:'GET',
+	        contentType:'application/json',
+	        url:"/kingstone/group/initmenu?accountid="+accountid,
+	        dataType: "json",
+	        success: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	          if(result.status==1){
+	            alert(result.msg);
+	        	handlemenu(result.items);
+	          }else if(result.status==0){
+	           var items=result.items;
+	           handlemenu(result.items);
+	          }
+	        },
+	        error: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	            alert(result.msg);
+	            
+	        }
+	      });
+}
+
+function handlemenu(items){
+	
+	var menuli=$("#menu");
+	menuli.html("");
+	var li="";
+	 
+	for(i=0;i<items.length;i++)
+	{
+	  if(items[i].value=="chart_all.html"){
+		  
+	  li+="<li class=\"select\"><a href=\"javascript:turnpage('"+items[i].value+"');\">"+items[i].key+"</a></li>"; 
+	  }else{
+		  li+="<li><a href=\"javascript:turnpage('"+items[i].value+"');\">"+items[i].key+"</a></li>"; 
+	  }
+	}
+	menuli.html(li);
+}
+
+function initDistrict(){
+	   var accountid=document.getElementById("accountid").value;
+	   
+	   $.ajax({
+	        type:'GET',
+	        contentType:'application/json',
+	        url:"/kingstone/group/groups?accountid="+accountid,
+	        dataType: "json",
+	        success: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	          if(result.status==1){
+	            alert(result.msg);
+	        	handledistrict(result.items);
+	          }else if(result.status==0){
+	           var items=result.items;
+	           handledistrict(result.items);
+	          }
+	        },
+	        error: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	            alert(result.msg);
+	            
+	        }
+	      });
+}
+
+function handledistrict(items){
+	
+	var dis=document.getElementById("district");
+	dis.options.length=items.length+1;
+	//var ORyear = document.getElementById('RYear');
+	for(i=0;i<items.length;i++)
+	{
+	 dis.options[i+1].value=items[i].id;
+	 dis.options[i+1].text=items[i].name;
+	}
+}
+
+
+</script>
+</body>
+</html>

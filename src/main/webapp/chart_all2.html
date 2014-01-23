@@ -1,0 +1,183 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>理财后台管理</title>
+<link href="lib/bootstrap/css/bootstrap.css" rel="stylesheet">
+<link href="css/style.css" type="text/css" rel="stylesheet" />
+<link href="lib/plugins/css/jquery.jqplot.css" type="text/css" rel="stylesheet" />
+</head>
+
+<body>
+<div class="finance_head">
+	<img src="images/finance_logo.jpg" />
+	<ul id="menu">
+       <li><a href="javascript:turnpage('index.html');">顾问列表</a></li> 
+        <li><a href="javascript:turnpage('system_adduser.html');">统计管理</a></li>
+         <li class="select"><a href="javascript:turnpage('chart_all.html');">统计分析</a></li>
+        <li ><a href="javascript:turnpage('account.html');">账号管理</a></li>
+        
+     
+    </ul>
+   <span id="loginid"><a href="login.html" target="_self">[退出]</a></span>
+</div>
+
+<div class="finance_body">
+	<div class="finance_chart_class cle">
+      <input type="hidden" id="accountid"/>
+      
+        <a href="chart_client.html" class="in_but">客户资料</a>     
+        <a href="javascript:turnpage('chart_operations.html');" class="in_but select">运营统计</a>
+        <a href="javascript:turnpage('chart_client.html');" class="in_but">客户资料</a>
+    </div>
+	<div class="cle">
+        <div id="client" class="finance_chart_all"></div>
+    </div>
+</div>
+
+<div class="finance_foot">COPYRIGHT© 2013 景淳投资管理</div>
+<script type="text/javascript" src="lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="lib/plugins/js/jquery.jqplot.js" ></script>
+<script type="text/javascript" src="lib/plugins/js/jqplot.pieRenderer.min.js" ></script>
+<script type="text/javascript" src="lib/plugins/js/jqplot.donutRenderer.min.js" ></script>
+
+<script type="text/javascript" src="lib/plugins/js/jqplot.barRenderer.min.js"></script>
+<script type="text/javascript" src="lib/plugins/js/jqplot.highlighter.min.js"></script>
+<script type="text/javascript" src="lib/plugins/js/jqplot.cursor.min.js"></script>
+<script type="text/javascript" src="lib/plugins/js/jqplot.pointLabels.min.js"></script>
+
+<script type="text/javascript" src="lib/plugins/js/jqplot.dateAxisRenderer.min.js"></script>
+<script type="text/javascript" src="lib/plugins/js/jqplot.logAxisRenderer.min.js"></script>
+<script type="text/javascript" src="lib/plugins/js/jqplot.canvasTextRenderer.min.js"></script>
+<script type="text/javascript" src="lib/plugins/js/jqplot.canvasAxisTickRenderer.min.js"></script>
+
+<script type="text/javascript">
+function handledata(item){
+  var genderData =  item;
+  $("#client").html("");
+  var gender = jQuery.jqplot ('client', [genderData], 
+    { 
+		grid: {
+            drawBorder: false, 
+            drawGridlines: false,
+            background: '#ffffff',
+            shadow:false
+        },
+      	seriesDefaults: {
+        // Make this a pie chart.
+        renderer: jQuery.jqplot.PieRenderer,
+        rendererOptions: {
+          // Put data labels on the pie slices.
+          // By default, labels show the percentage of the slice.
+          showDataLabels: true,
+		  sliceMargin: 4
+        }
+      }, 
+      legend: { 
+			show:true,
+			rendererOptions: {
+                numberRows: 1
+            }, 
+			location: 's'
+	  },
+	  title: "客户数统计"
+    }
+  );
+  
+}
+
+$(function(){
+	var accountid=GetQueryString('accountid');
+	if(accountid==null||accountid==""){
+		alert("请先登录!");
+		window.location.href="login.html";
+		return;
+	}
+	document.getElementById("accountid").value=accountid;
+	initMenu();
+	groupanalysis();
+})
+
+function groupanalysis(){
+	   var accountid=document.getElementById("accountid").value;
+	   $.ajax({
+	        type:'GET',
+	        contentType:'application/json',
+	        url:"/kingstone/group/groupanalysis?accountid="+accountid,
+	        dataType: "json",
+	        success: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	          if(result.status==1){
+	            alert(result.msg);
+	          }else if(result.status==0){
+	           var item=result.item;
+	           handledata(item);
+	          }
+	        },
+	        error: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	            alert(result.msg);
+	            
+	        }
+	      });
+}
+
+function GetQueryString(name) 
+{ 
+var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)"); 
+var r = window.location.search.substr(1).match(reg); 
+if (r!=null) return unescape(r[2]); return null; 
+}  
+ 
+function turnpage(page){
+	var accountid=$("#accountid").val();
+	window.location.href=page+"?accountid="+accountid;
+}
+function initMenu(){
+	   var accountid=document.getElementById("accountid").value;
+	   
+	   $.ajax({
+	        type:'GET',
+	        contentType:'application/json',
+	        url:"/kingstone/group/initmenu?accountid="+accountid,
+	        dataType: "json",
+	        success: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	          if(result.status==1){
+	            alert(result.msg);
+	        	handlemenu(result.items);
+	          }else if(result.status==0){
+	           var items=result.items;
+	           handlemenu(result.items);
+	          }
+	        },
+	        error: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	            alert(result.msg);
+	            
+	        }
+	      });
+}
+
+function handlemenu(items){
+	
+	var menuli=$("#menu");
+	menuli.html("");
+	var li="";
+	 
+	for(i=0;i<items.length;i++)
+	{
+	  if(items[i].value=="chart_all.html"){
+		  
+	  li+="<li class=\"select\"><a href=\"javascript:turnpage('"+items[i].value+"');\">"+items[i].key+"</a></li>"; 
+	  }else{
+		  li+="<li><a href=\"javascript:turnpage('"+items[i].value+"');\">"+items[i].key+"</a></li>"; 
+	  }
+	}
+	menuli.html(li);
+}
+
+</script>
+
+</body>
+</html>

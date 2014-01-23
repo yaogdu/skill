@@ -1,0 +1,103 @@
+body { font:14px/24px "微软雅黑"; color:#777777;}
+.iss_display_none { display:none;}
+.iss_bg:after { background: url(../images/iss_bg_1.png) repeat left top; content: ''; display: block; position: absolute; top: 0; right: 0; bottom: 0; left: 0;}
+.iss_bg { background-color:#BC161F; background: linear-gradient(45deg, #BC161F 0%, #E74C3C 100%) repeat scroll 0 0 transparent; margin-bottom:40px;}
+.container { position: relative; z-index: 2;}
+.iss_nav { margin:10px 0 30px;}
+.iss_nav a { margin-left:10px;}
+.iss_nav a:link {color: #F3B5B0; text-decoration:none;}
+.iss_nav a:visited {color: #F3B5B0;text-decoration:none;}
+.iss_nav a:hover {color: #000; text-decoration:none;}
+.iss_nav a:active {color: #F3B5B0;}
+
+.iss_h { margin-top:100px;}
+.iss_h h1,.iss_h h4 { color:#fff; font-family:"微软雅黑"; font-weight:normal;}
+.iss_h h4 { margin-top:20px;}
+.iss_login { background:#fff; height:340px; overflow:hidden; position:relative;}
+ul { list-style:none; margin:0; padding:0;}
+.iss_login li { float:left; width:50%; line-height:36px; background:#2ECC71; color:#fff; font:18px/36px "微软雅黑"; text-align:center; cursor:pointer;}
+.iss_login li.select { background:#27AE60; cursor:default;}
+
+.iss_arrow_down { width:0px; height:0px; display:block; border-left:8px solid transparent; border-right:8px solid transparent; border-top:8px solid #27AE60; font-size:0px; line-height:0px; clear:both; margin-left:127px;}
+.iss_login_c_a { position:absolute; top:44px; left:0px; width:1200px; height:297px;}
+.iss_login_c { padding:40px 60px; color:#94A5A5; float:left;}
+.iss_login_c a:link {color: #94A5A5; text-decoration:none;}
+.iss_login_c a:visited {color: #94A5A5;text-decoration:none;}
+.iss_login_c a:hover {color: #000; text-decoration:none;}
+.iss_login_c a:active {color: #94A5A5;}
+
+.iss_inline { display:inline; margin-right:10px;}
+.iss_inline input { vertical-align:-2px; margin-right:3px;}
+.iss_in { margin-top:15px;}
+.iss_in input[type="text"],.iss_in input[type="password"] { border-radius:0; height:40px; font:16px/40px "微软雅黑"; margin-bottom:18px;}
+
+.iss_in input[type="submit"],.iss_in input[type="button"] { background:#27AE60; color:#fff; height:40px; border:none; font-size:16px;}
+.iss_in input[type="submit"]:hover,.iss_in input[type="button"]:hover { background:#F1C40F;}
+.iss_feature h4 { font-weight:normal; color:#000;}
+.iss_feature h4 img { vertical-align:-5px; margin-right:6px;}
+.iss_feature p { padding:0 30px;}
+
+footer { background:#ECF0F1; text-align:center; line-height:18px; padding:20px; margin-top:60px;}
+
+.iss_top { background-color:#BC161F; background: linear-gradient(45deg, #BC161F 0%, #E74C3C 100%) repeat scroll 0 0 transparent; height:46px; position:relative; z-index:9999;}
+
+h3.iss_logo { font-weight:normal; color:#fff; line-height:46px; padding:0; margin:0; font-size:20px;}
+.iss_nav_m { color:#fff;}
+.iss_nav_m li { float:left; line-height:46px; margin-right:20px;}
+.iss_nav_m li img { margin-left:5px}
+.iss_nav_m li.select { background:#CE3B3D; padding:0 14px;}
+.iss_search { padding-top:10px;}
+.iss_search li { float:left;}
+.iss_search input[type="text"] { height:24px; border:solid #EFAFAD; border-width:1px 0 1px 1px; background:#EC9C99; width:156px; font-size:12px; padding:0 4px; border-radius:0;}
+.iss_search input[type="submit"] { background:#EFAFAD url(../images/iss_icon_9.png) no-repeat center center; color:#fff; height:26px; border:none; width:42px;}
+.iss_quick { padding-top:10px;}
+.iss_quick img { margin-right:16px;}
+.iss_quick span img { margin-right:0px;}
+
+.iss_subtitle { height:100px; border-bottom:1px solid #DDEAE2; background:#FAFCFB; position:relative; z-index:9998;}
+.iss_sub_logo { font-weight:normal; color:#26AC5F; line-height:46px; padding:0; margin:0; font-size:30px; line-height:100px;}
+.iss_nav_s { padding-top:40px;}
+.iss_nav_s li { float:left; margin-right:20px;}
+.iss_nav_s li a { padding:10px 14px;}
+.iss_nav_s li.select a { background:#26AC5F; color:#fff;}
+.iss_nav_s li strong { margin:10px 0 0 4px;}
+.iss_subtitle a:link {color: #26AC5F; text-decoration:none;}
+.iss_subtitle a:visited {color: #26AC5F;text-decoration:none;}
+.iss_subtitle a:hover {color: #000; text-decoration:none;}
+.iss_subtitle a:active {color: #26AC5F;}
+
+.iss_manag { padding-top:40px;}
+.iss_admin span { background: url(../images/glyphicons-halflings.png) no-repeat -432px 10px; padding:6px; margin-right:4px;}
+
+.iss_l_sub { border-right:1px solid #DDEAE2;}
+.iss_main_c { margin-top:20px;}
+
+.iss_l_m { padding:26px 0; border-bottom:1px solid #DDEAE2; float:left;}
+.iss_l_m li { float:left; margin-right:8px; line-height:24px;}
+.iss_l_n { clear:both; padding-top:1px;}
+.iss_l_n h6 { margin-top:30px; font-size:14px; color:#000;}
+.iss_l_n li { line-height:26px;}
+.iss_l_n li a { padding:0 18px;}
+.iss_l_n li.select { background:#DDEAE2; border-left:5px solid #26AC5F;}
+.iss_l_n li.select a { color:#000; padding:0 18px 0 13px;}
+.iss_l_n a:link {color: #26AC5F; text-decoration:none;}
+.iss_l_n a:visited {color: #26AC5F;text-decoration:none;}
+.iss_l_n a:hover {color: #000; text-decoration:none;}
+.iss_l_n a:active {color: #26AC5F;}
+
+.iss_l_n span {  background-image: url(../images/glyphicons-halflings.png); padding:6px 8px; margin-right:2px; background-repeat:no-repeat;}
+.iss_dynamic span { background-position:-26px -15px;}
+.iss_task span { background-position:-145px -64px;}
+.iss_knowledge span { background-position:-409px -112px;}
+.iss_app span { background-position:-217px 8px;}
+
+.iss_dropdown { position:relative;}
+.iss_color_white {color: #ffffff; text-decoration:none;}
+.iss_color_white:link {color: #ffffff; text-decoration:none;}
+.iss_color_white:visited {color: #ffffff;text-decoration:none;}
+.iss_color_white:hover {color: #ffffff; text-decoration:none;}
+.iss_color_white:active {color: #ffffff;}
+
+.iss_dropdown_menu li { line-height:20px; margin:0; float:none;}
+.iss_dropdown_menu li a { padding:3px 20px; line-height:20px; margin:0;}
+.iss_dropdown_menu li a:hover { background:#26AC5F;}

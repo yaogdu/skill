@@ -1,0 +1,61 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>理财后台管理</title>
+<link href="css/style.css" type="text/css" rel="stylesheet" />
+</head>
+
+<body>
+<div class="finance_login_body_bg cle">
+    <div class="finance_login_body">
+        <div class="finance_login_input">
+            <h1>用户登录</h1>
+            <div>
+                <form action="">
+                    <p><input id="financeName" type="text" placeholder="用户名" /></p>
+                    <p><input id="financePassword" type="password" placeholder="密码" /></p>
+                    <input type="button" id="login" value="登录" class="in_but" />
+                </form>
+            </div>
+        </div>
+        <div class="finance_login_logo">
+            <img src="images/finance_logo_login.jpg" />
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="lib/jquery/jquery.min.js"></script>
+<script type="text/javascript">
+function loginform(){
+ 
+	$.ajax({
+		type: 'POST',
+		contentType: 'application/json',
+		url: "/kingstone/account/weblogin",
+		dataType: "json",
+		data: JSON.stringify({
+			"loginId":$("#financeName").val(),
+			"passwordHash":$("#financePassword").val()
+			}),
+		success: function(response){
+			var result=JSON.parse(JSON.stringify(response));
+			if(result.status==1){
+				alert(result.msg);
+			}else if(result.status==0){
+				window.location.href="index.html?accountid="+result.item.id;
+			}
+		},
+		error: function(response){
+			alert(JSON.parse(JSON.stringify(response)).msg);
+		   
+		}
+	});
+}
+$(function(){
+	$("#login").click(function(){
+		loginform();
+	})	
+})
+</script>
+</body>
+</html>

@@ -1,0 +1,214 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>理财后台管理</title>
+<link href="lib/bootstrap/css/bootstrap.css" rel="stylesheet">
+<link href="lib/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/style.css" type="text/css" rel="stylesheet" />
+</head>
+
+<body>
+<div class="finance_head">
+	<img src="images/finance_logo.jpg" />
+	<ul>
+ <li id="menu">
+    </ul>
+    <span><a href="login.html" target="_self">[退出]</a></span>
+</div>
+<div class="finance_body">
+    <div id="userop" class="finance_chart_class cle">
+    	
+    </div>
+    <form>
+    <div class="finance_search">
+        
+    </div>
+    </form>
+     <input type="hidden" id="accountid"/>
+        <input type="hidden" id="pageNo" value="1"/>
+        <input type="hidden" id="consultantid" value=""/>
+     <div id="groupop" class="finance_tool">
+    
+    	
+    </div>
+    <table border="0" cellspacing="1" cellpadding="0" class="finance_list table-hover" align="center" id="tbl_group">
+		<tr>
+            <th>组名</th>
+            <th>地区</th>
+            <th>组长</th>
+            <th>组长编号</th>
+            <th>创建日期</th>
+            <th>操作</th>
+        </tr>
+        
+    </table>
+</div>
+
+<div class="finance_foot">COPYRIGHT© 2013 景淳投资管理</div>
+<script type="text/javascript" src="lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="lib/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+
+function GetQueryString(name) 
+{ 
+var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)"); 
+var r = window.location.search.substr(1).match(reg); 
+if (r!=null) return unescape(r[2]); return null; 
+}  
+ 
+ 
+function handleitems(items){ 
+	emptyTable("tbl_group");
+	for(var i=0;i<items.length;i++){
+		var item=items[i];
+		var newRow = "<tr><td>"+item.name+"</td><td>"+item.district+"</td><td>"+item.leadername+"</td><td>"+item.consultantno+"</td><td>"+item.generatetime+"</td><td><a href=\"javascript:modify('"+item.id+"');\">修改</a>  <a class=\"showpawd\" href=\"javascript:del('"+item.id+"');\" >删除</a> <a href=\"javascript:map('"+item.id+"');\">组员活动轨迹</a></td></tr>";
+		$("#tbl_group tr:last").after(newRow);
+	}
+}
+
+
+
+function groups(){
+	   var accountid=document.getElementById("accountid").value;
+	   $.ajax({
+	        type:'GET',
+	        contentType:'application/json',
+	        url:"/kingstone/group/groups?accountid="+accountid,
+	        dataType: "json",
+	        success: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	          if(result.status==1){
+	            alert(result.msg);
+	        	handleitems(result.items);
+	          }else if(result.status==0){
+	           var items=result.items;
+			   handleitems(items);
+	          }
+	        },
+	        error: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	            alert(result.msg);
+	        }
+	      });
+	}
+
+
+$(function(){
+    var accountid=GetQueryString('accountid');
+    document.getElementById("accountid").value=accountid;
+   	groups();
+   	initMenu();
+   
+})
+
+function turnpage(page){
+  var accountid=$("#accountid").val();
+  window.location.href=page+"?accountid="+accountid;
+}
+
+function emptyTable(tableid){
+	var trslength= $("#"+tableid).find("tr").length;
+	for(var i=trslength;i>=1;i--) //保留最前面两行！
+	{
+	    $("#"+tableid).find("tr").eq(i).remove();
+	}
+}
+
+function map(id){
+	window.location.href="groupmap.html?groupid="+id+"&accountid="+$("#accountid").val();
+}
+
+function modify(id){
+	var accountid=$("#accountid").val();
+	window.location.href="system_group_edit.html?accountid="+accountid+"&groupid="+id;
+}
+function del(id){
+	var a=confirm("是否确认删除");
+	if(a){
+		$.ajax({
+	        type: 'POST',
+	        contentType: 'application/json',
+	        url: "/kingstone/group/delgroup",
+	        dataType: "json",
+	        data: JSON.stringify({
+	        	"id":id,
+	        	}),
+	        success: function(response){
+	        	 var result=JSON.parse(JSON.stringify(response));
+	        	 alert(result.msg);
+	        	 groups();
+	        },
+	        error: function(response){
+	        	 var result=JSON.parse(JSON.stringify(response));
+	        	 alert(result.msg);
+	           
+	        }
+	        
+	         
+	    });
+		
+	}
+}
+function initMenu(){
+	   var accountid=document.getElementById("accountid").value;
+	   
+	   $.ajax({
+	        type:'GET',
+	        contentType:'application/json',
+	        url:"/kingstone/group/initmenu?accountid="+accountid,
+	        dataType: "json",
+	        success: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	          if(result.status==1){
+	            alert(result.msg);
+	        	handlemenu(result.items);
+	          }else if(result.status==0){
+	           var item=result.item;
+	           handleuserop(item);
+	           var items=result.items;
+	           handlemenu(result.items);
+	          }
+	        },
+	        error: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	            alert(result.msg);
+	            
+	        }
+	      });
+}
+
+function handleuserop(item){
+	var level=item.level;
+	
+	if(level==0){
+		var userop="<a href=\"javascript:turnpage('system_adduser.html');\" class=\"in_but select\">添加用户</a>";
+		userop+=" <a href=\"javascript:turnpage('system_group.html');\" class=\"in_but\">群组管理</a>";
+		$("#userop").html(userop);
+		
+		var groupop="<a href=\"javascript:turnpage('system_group_add.html');\">添加组</a>";
+		$("#groupop").html(groupop);
+	}
+}
+
+function handlemenu(items){
+	
+	var menuli=$("#menu");
+	menuli.html("");
+	var li="";
+	 
+	for(i=0;i<items.length;i++)
+	{
+	  if(items[i].value=="system_group.html"){
+		  
+	  li+="<li class=\"select\"><a href=\"javascript:turnpage('"+items[i].value+"');\">"+items[i].key+"</a></li>"; 
+	  }else{
+		  li+="<li><a href=\"javascript:turnpage('"+items[i].value+"');\">"+items[i].key+"</a></li>"; 
+	  }
+	}
+	menuli.html(li);
+}
+</script>
+
+</body>
+</html>

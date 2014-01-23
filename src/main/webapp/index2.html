@@ -1,0 +1,206 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="application/pdf; charset=utf-8">
+    <title>测试post</title>
+    
+ <script language="JavaScript" src="static/lib/jquery/jquery.min.js">
+ </script>
+ <script>
+    
+   	 function toCollect(){
+    	
+    	    console.log('collectGoods');
+    	    $.ajax({
+    	        type: 'POST',
+    	        contentType: 'application/json',
+    	        url: "/kingstone/account/register",
+    	        dataType: "json",
+    	        data: JSON.stringify({
+    	        	"consultantno":"SH001",
+    	        	"name":"高明",
+    	        	"title":"高级理财顾问",
+    	        	"certificate":"高级理财师证书",
+    	        	"experience":"经验丰富",
+    	        	"feature":"特长"
+    	   	        }),
+    	        success: function(response){
+    	        	alert(eval(response).message);
+    	            
+    	        },
+    	        error: function(response){
+    	        	alert(eval(response).message);
+    	           
+    	        }
+    	    });
+    	}
+   	 
+   	 function getPDF(){
+     	
+ 	    console.log('collectGoods');
+ 	    $.ajax({
+ 	        type: 'GET',
+ 	        contentType: 'application/pdf',
+ 	        url: "/kingstone/doc/download?id=123456",
+ 	        dataType:"json",
+ 	        success: function(response){
+ 	        	alert(eval(response).message);
+ 	            
+ 	        },
+ 	        error: function(response){
+ 	        	alert(eval(response).message);
+ 	           
+ 	        }
+ 	    });
+ 	}
+   	 
+	 function getCus(){
+	     	
+	 	    console.log('collectGoods');
+	 	    $.ajax({
+	 	        type: 'GET',
+	 	        contentType: 'application/json',
+	 	        url: "http://localhost:8080/kingstone/customer/getInfo?id=18863b6856514b8bb26607750ac3b1cc",
+	 	        dataType:"json",
+	 	        success: function(response){
+	 	        	
+	 	            
+	 	        },
+	 	        error: function(response){
+	 	        	
+	 	           
+	 	        }
+	 	    });
+	 	}
+   	 
+   	
+
+   	 
+   	 function toCommentAgent(){
+     	
+ 	    console.log('collectGoods');
+ 	    $.ajax({
+ 	        type: 'POST',
+ 	        contentType: 'application/json',
+ 	        url: "/kingstone/account/login",
+ 	        dataType: "json",
+ 	        data: JSON.stringify({"loginId":document.getElementById("loginId"),
+ 	        	"passwordHash":"SH001"
+ 	 	        }
+ 	        ),
+ 	        success: function(response){
+ 	        	 JSON.parse(response).items[0].username
+ 	          
+ 	        },
+ 	        error: function(response){
+ 	        	alert(eval(response).message);
+ 	           
+ 	        }
+ 	    });
+ 	}
+   	 
+function getTest(){
+     	
+ 	    console.log('collectGoods');
+ 	    $.ajax({
+ 	        type: 'GET',
+ 	        contentType: 'application/json',
+ 	        url: "/kingstone/account/login/aaa/bbb",
+ 	        dataType: "json",
+ 	       	
+ 	        success: function(response){
+ 	        	alert(JSON.stringify(response).message);
+ 	            
+ 	        },
+ 	        error: function(response){
+ 	        	alert(eval(response).message);
+ 	           
+ 	        }
+ 	    });
+ 	}
+   	 
+   	function formToJSON() {
+   	    return JSON.stringify({
+   	    	"name":"zhangsan",
+   	    	"tel":"01029394",
+   	    	"idcard":"1293893",
+   	    	"gender":0,
+   	    	"photo":"123",
+   	    	"backuptel":"01029393",
+   	    	"address":"isoft"
+   	       
+   	        });
+   	}
+   	
+   	
+ function todocollect(){
+     	
+ 	    console.log('collectCar');
+ 	    $.ajax({
+ 	        type: 'POST',
+ 	        contentType: 'application/json',
+ 	        url: "/logistics/car/collectCar",
+ 	        dataType: "json",
+ 	        data:JSON.stringify({
+ 	        	"car":{"id":"22f73ec5d9704a459649c12ac40e1d34"},
+ 	        	"agent":{"id":"22f73ec5d9704a459649c12ac40e1d37"}
+ 	        	}),
+ 	        success: function(response){
+ 	        	alert(eval(response).message);
+ 	            
+ 	        },
+ 	        error: function(response){
+ 	        	alert(eval(response).message);
+ 	           
+ 	        }
+ 	    });
+ 	}
+ 
+ 
+  function uploadfile() {
+	 $("#myform").submit();
+		
+		//$.post("http://localhost:8080/kingstone/customer/uploadphoto",
+			//	  $("#myform").serialize(),
+		//		   function(data){ }
+			//	);
+  }
+  
+
+  function uploaddoc() {
+	 $("#myform2").submit();
+		
+		//$.post("http://localhost:8080/kingstone/customer/uploadphoto",
+			//	  $("#myform").serialize(),
+		//		   function(data){ }
+			//	);
+  }
+  
+  
+	 
+    </script>
+</head>
+
+<body>
+                                                                                  
+ 
+<form method="POST" action="/kingstone/doc/uploadsdata" enctype="multipart/form-data" id="myform2" >
+            <p><input type="text" name="fileIntro" value="" />文件介绍</p>
+            <p><input type="file" name="myfile2" value="浏览文件" /></p>
+            <p><input type="submit" value="上传" onclick="uploaddoc();"/></p>
+            </form>
+	<div class="iss_bg">
+  
+    <label>Car</label><input type="text" id="carid"/><br/>
+    <label>Goods</label><input type="text" id="goodsid"/><br/>
+    <input type="button" value="+" onclick="toCollect();"/>
+    
+      <input type="button" value="--" onclick="toCommentAgent();"/>
+      
+        <input type="button" value="mycars" onclick="todocollect();"/>
+        
+           <input type="button" value="pdf" onclick="getPDF();"/>
+    </div>
+   
+</body>
+</html>

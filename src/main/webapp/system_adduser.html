@@ -1,0 +1,340 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>理财后台管理</title>
+<link href="lib/bootstrap/css/bootstrap.css" rel="stylesheet">
+<link href="lib/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/style.css" type="text/css" rel="stylesheet" />
+</head>
+
+<body>
+<div class="finance_head">
+	<img src="images/finance_logo.jpg" />
+	<ul id="menu">
+        <li><a href="javascript:turnpage('index.html');">顾问列表</a></li> 
+        <li class="select"><a href="javascript:turnpage('system_adduser.html');">渠道管理</a></li>
+         <li><a href="javascript:turnpage('chart_all.html');">统计分析</a></li>
+        <li><a href="javascript:turnpage('account.html');">账号管理</a></li>
+    </ul>
+    <span><a href="login.html" target="_self">[退出]</a></span>
+</div>
+<div class="finance_body">
+    <div id="userop" class="finance_chart_class cle">
+    	 
+    </div>
+    <form class="form-horizontal">
+    	 <input type="hidden" id="accountid"/>
+         <input type="hidden" id="consultantid" value=""/>
+        <h2>基本信息</h2>
+        <div class="control-group">
+            <label class="control-label" >编号</label>
+            <div class="controls">
+                <input id="consultantno" type="text" class="empty_verification"/>
+            </div>
+        </div>
+         <div class="control-group">
+            <label class="control-label">密码</label>
+            <div class="controls">
+                <input id="password" type="password" class="pas_verification" />
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label">确认密码</label>
+            <div class="controls">
+                <input type="password" class="confirm_pas_verification" />
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <label class="control-label" >姓名</label>
+            <div class="controls">
+                <input id="name" type="text" class="empty_verification"/>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" >性别</label>
+            <div class="controls">
+                <select id="gender">
+                    <option value=0>男</option>
+                    <option value=1>女</option>
+                </select>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" >职位</label>
+            <div class="controls">
+            <select id="title">
+                    <option value=0>技术总监</option>
+                    <option value=1>首席理财师</option>
+                    <option value=2>资深理财师</option>
+                    <option value=3>理财师</option>
+                    <option value=4>助理理财师</option> 
+            </select>
+                
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" >电话</label>
+            <div class="controls">
+                <input type="text" id="mobile" class="empty_verification"/>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" >邮箱</label>
+            <div class="controls">
+                <input type="text" id="email" class="email_verification" />
+            </div>`
+        </div>
+        <div class="control-group">
+            <label class="control-label" >学历</label>
+            <div class="controls">
+                <select id="degree">
+                    <option value=0>本科</option>
+                    <option value=1>硕士</option>
+                    <option value=2>博士</option>
+                    <option value=3>其它</option>
+                </select>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" >投资专长</label>
+            <div class="controls">
+                <textarea id="feature" rows="5"  class="input-xxlarge empty_verification"></textarea>
+          </div>
+        </div>
+          <div class="control-group">
+            <label class="control-label" >专业认证</label>
+            <div class="controls">
+                <textarea id="certificate" rows="5" class="input-xxlarge empty_verification"></textarea>
+          </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" >工作经验</label>
+            <div class="controls">
+                <textarea id="experience" rows="5" class="input-xxlarge empty_verification"></textarea>
+            </div>
+        </div>
+        <div class="control-group">
+            <div class="controls">
+                <input type="button" value="保存" id="btnsave" class="in_but" />
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="finance_foot">COPYRIGHT© 2013 景淳投资管理</div>
+<script type="text/javascript" src="lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="lib/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+
+function GetQueryString(name) 
+{ 
+var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)"); 
+var r = window.location.search.substr(1).match(reg); 
+if (r!=null) return unescape(r[2]); return null; 
+}  
+function emptyVerification(obj){
+	var text = '<span class="help-inline">请输入内容</span>';
+	$(obj).each(function(i){
+		if(obj.eq(i).val() == "" && !obj.eq(i).next("span")[0]){
+			obj.eq(i).closest("div.control-group").addClass("error");
+			obj.eq(i).after(text);
+		}
+		if(obj.eq(i).val() != ""){
+			obj.eq(i).next("span").remove();
+			obj.eq(i).closest("div.control-group").removeClass("error");
+		}
+	});
+	
+	if($("span.help-inline")[0]){
+		return false;
+	}
+	
+}
+
+function emailVerification(obj){
+	var reg = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/;
+	var text = '<span class="help-inline">请输入正确的邮箱格式</span>';
+	$(obj).each(function(i){
+		if(reg.test(obj.val())){
+			obj.next("span").remove();
+			obj.closest("div.control-group").removeClass("error");
+		}else if(!obj.eq(i).next("span")[0]){
+			obj.eq(i).closest("div.control-group").addClass("error");
+			obj.eq(i).after(text);
+		}
+	});
+	if($("span.help-inline")[0]){
+		return false;
+	}
+}
+
+function confirm_pas_verification(obj,pas){
+	var text = '<span class="help-inline">确认密码与密码不同</span>';
+	var pas = pas.val();
+	var confirm_pas = obj.val();
+	if(pas != confirm_pas && !obj.next("span")[0]){
+		obj.closest("div.control-group").addClass("error");
+		obj.after(text);
+	}
+	if(pas == confirm_pas){
+		obj.next("span").remove();
+		obj.closest("div.control-group").removeClass("error");
+	}
+	
+	if($("span.help-inline")[0]){
+		return false;
+	}
+}
+
+function pasNum(obj){
+	var text = '<span class="help-inline">请设置六位数以上的字母、数字或字符</span>';
+	var leng = obj.val().length
+	if(leng < 6 && !obj.next("span")[0]){
+		obj.closest("div.control-group").addClass("error");
+		obj.after(text);
+	}
+	if(leng >= 6){
+		obj.next("span").remove();
+		obj.closest("div.control-group").removeClass("error");
+	}
+	if($("span.help-inline")[0]){
+		return false;
+	}
+}
+
+function saveConsultant(){
+	 
+	$.ajax({
+		type: 'POST',
+		contentType: 'application/json',
+		url: "/kingstone/account/webadd",
+		dataType: "json",
+		data: JSON.stringify({
+			"consultantno":$("#consultantno").val(),
+			"name":$("#name").val(),
+			"password":$("#password").val(),
+			"gender":$("#gender").val(),
+			"title":$("#title").val(),
+			"mobile":$("#mobile").val(),
+			"email":$("#email").val(),
+			"degree":$("#degree").val(),
+			"feature":$("#feature").val(),
+			"certificate":$("#certificate").val(),
+			"experience":$("#experience").val()
+			}),
+		success: function(response){
+			var result=JSON.parse(JSON.stringify(response));
+			alert(result.msg);
+			if(result.status==0){
+			$("input[type='text'],input[type='password'],textarea").val("");
+			}
+			
+		},
+		error: function(response){
+			alert(JSON.parse(JSON.stringify(response)).msg);
+		}
+	});
+}
+ 
+
+$(function(){
+	 var accountid=GetQueryString('accountid');
+	 document.getElementById("accountid").value=accountid;
+	$(".empty_verification").blur(function(){
+		emptyVerification($(this));
+	});
+	$(".email_verification").blur(function(){
+		emailVerification($(this));
+	});
+	$(".confirm_pas_verification").blur(function(){
+		confirm_pas_verification($(this),$(".pas_verification"));
+	});
+	$(".pas_verification").blur(function(){
+		pasNum($(this));
+	});
+	initMenu();
+	$("#btnsave").click(function(){
+		
+		var empty = emptyVerification($(".empty_verification"));
+		var email = emailVerification($(".email_verification"));
+		var pas = confirm_pas_verification($(".confirm_pas_verification"),$(".pas_verification"));
+		var pasnum = pasNum($(".pas_verification"));
+		if(empty == false || email == false || pas == false || pasnum == false){
+			return false;
+		}else{
+		saveConsultant();
+		}
+		
+	});
+})
+
+function turnpage(page){
+	var accountid=$("#accountid").val();
+	window.location.href=page+"?accountid="+accountid;
+}
+ 
+function initMenu(){
+	   var accountid=document.getElementById("accountid").value;
+	   
+	   $.ajax({
+	        type:'GET',
+	        contentType:'application/json',
+	        url:"/kingstone/group/initmenu?accountid="+accountid,
+	        dataType: "json",
+	        success: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	          if(result.status==1){
+	            alert(result.msg);
+	        	handlemenu(result.items);
+	          }else if(result.status==0){
+	        	 var item=result.item;
+	        	 handleuserop(item);
+	           var items=result.items;
+	           handlemenu(result.items);
+	          }
+	        },
+	        error: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	            alert(result.msg);
+	            
+	        }
+	      });
+}
+
+function handleuserop(item){
+	var level=item.level;
+	
+	if(level==0){
+		var userop="<a href=\"javascript:turnpage('system_adduser.html');\" class=\"in_but select\">添加用户</a>";
+		userop+=" <a href=\"javascript:turnpage('system_group.html');\" class=\"in_but\">群组管理</a>";
+		$("#userop").html(userop);
+		
+		//var groupop="<a href=\"javascript:turnpage('system_group_add.html');\">添加组</a>";
+		//$("#groupop").html(groupop);
+	}
+}
+
+function handlemenu(items){
+	
+	var menuli=$("#menu");
+	menuli.html("");
+	var li="";
+	 
+	for(i=0;i<items.length;i++)
+	{
+	  if(items[i].value=="system_group.html"){
+		  
+	  li+="<li class=\"select\"><a href=\"javascript:turnpage('"+items[i].value+"');\">"+items[i].key+"</a></li>"; 
+	  }else{
+		  li+="<li><a href=\"javascript:turnpage('"+items[i].value+"');\">"+items[i].key+"</a></li>"; 
+	  }
+	}
+	menuli.html(li);
+}
+
+</script>
+
+</body>
+</html>

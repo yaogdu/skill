@@ -1,0 +1,292 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>理财后台管理</title>
+<link href="lib/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+
+<link href="lib/bootstrap/css/bootstrap.css" rel="stylesheet">
+<link href="css/style.css" type="text/css" rel="stylesheet" />
+<link href="lib/plugins/css/jquery.jqplot.css" type="text/css" rel="stylesheet" />
+
+<link href="lib/jqueryui/css/jquery.ui.theme.css" type="text/css" rel="stylesheet" />
+<link href="lib/jqueryui/css/jquery.ui.core.css" type="text/css" rel="stylesheet" />
+<link href="lib/jqueryui/css/jquery.ui.datepicker.css" type="text/css" rel="stylesheet" />
+<link href="lib/jqueryui/css/jquery.ui.all.css" type="text/css" rel="stylesheet">
+</head>
+
+<body>
+<input type="hidden" id="accountid"/>
+<input type="hidden" id="pageNo" value="1"/>
+<input type="hidden" id="consultantid" value=""/>
+
+  <div class="finance_head">
+    <img src="images/finance_logo.jpg" />
+    <ul id="menu">
+      <li><a href="javascript:turnpage('index.html');">顾问列表</a></li> 
+      <li><a href="javascript:turnpage('system_adduser.html');">渠道管理</a></li>
+      <li class="select"><a href="javascript:turnpage('chart_all.html');">统计分析</a></li>
+      <li><a href="javascript:turnpage('account.html');">账号管理</a></li>
+    </ul>
+    <span id="loginid"><a href="login.html" target="_self">[退出]</a></span>
+  </div>
+  <div class="finance_body">
+    <div class="finance_chart_class cle">
+         <a href="javascript:turnpage('chart_all.html');" class="in_but">工作量统计</a>
+        <a href="javascript:turnpage('chart_operations.html');" class="in_but">运营统计</a>
+        <a href="javascript:turnpage('chart_client.html');" class="in_but">客户资料</a>
+         <a href="javascript:turnpage('workforce.html');" class="in_but select">成果统计</a>
+    </div>
+      <div class="finance_search">
+        
+        <p>
+          <label>渠道：</label> <select id="district">
+            <option value=-1>全部</option>
+            <option value=0>上海</option>
+            <option value=1>香港</option>
+          </select>
+        </p>
+        <p>
+        <p>
+        <label for="timefrom">时间选择：</label> <input type="text" id="timefrom" class="input-small" /> 
+        </p>
+        <div>
+          <input type="button" value="搜索" id="search" class="in_but" onclick="javascript:workforce(1);" />
+        </div>
+      </div>
+    
+    <table id="tbl_consultant" border="0" cellspacing="1" cellpadding="0" class="finance_list table-hover" align="center">
+      <tr>
+        <th>编号</th>
+        <th>姓名</th>
+        <th>总客户数</th>
+        <th>已成交客户数</th>
+        <th>成交率</th>
+        <th>月新增客户数</th>
+        <th>月成交客户数</th>
+        <th>月拜访量</th>
+      </tr> 
+    </table>
+    <div class="finance_page">
+       
+      <div class="finance_page_r">
+       <a class="n" href="javascript:prePage();">&lt;上一页</a> <strong>第<span id="currentPage">1</span>页</strong> <strong>共<span id="totalPage">1</span>页</strong><a class="n" href="javascript:nextPage();">下一页&gt;</a>
+      </div>
+    </div>
+  </div>
+  <div class="finance_foot">COPYRIGHT© 2013 景淳投资管理</div>
+
+ 
+
+<script type="text/javascript" src="lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="lib/plugins/js/jquery.jqplot.js" ></script>
+<script type="text/javascript" src="lib/plugins/js/jqplot.pieRenderer.min.js" ></script>
+<script type="text/javascript" src="lib/plugins/js/jqplot.donutRenderer.min.js" ></script>
+
+<script type="text/javascript" src="lib/plugins/js/jqplot.barRenderer.min.js"></script>
+<script type="text/javascript" src="lib/plugins/js/jqplot.highlighter.min.js"></script>
+<script type="text/javascript" src="lib/plugins/js/jqplot.cursor.min.js"></script>
+<script type="text/javascript" src="lib/plugins/js/jqplot.pointLabels.min.js"></script>
+
+<script type="text/javascript" src="lib/plugins/js/jqplot.dateAxisRenderer.min.js"></script>
+
+<script type="text/javascript" src="lib/jqueryui/js/jquery.ui.datepicker.min.js"></script>
+<script type="text/javascript" src="lib/jqueryui/js/jquery.ui.datepicker-zh-CN.min.js"></script>
+<script type="text/javascript" src="lib/jqueryui/js/jquery.ui.core.min.js"></script>
+<script type="text/javascript" src="js/date.select.js"></script>
+
+<script type="text/javascript" src="lib/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+
+function workforce(pageNo){
+   document.getElementById("pageNo").value=pageNo;
+   document.getElementById("currentPage").innerHTML=pageNo;
+   var accountid=document.getElementById("accountid").value;
+   var district=$("#district").val();
+   
+   $.ajax({
+        type:'GET',
+        contentType:'application/json',
+        url:"/kingstone/group/workforce?accountid="+accountid+"&pageNo="+pageNo+"&pageSize=10&district="+district+"&timefrom="+$("#timefrom").val(),
+        dataType: "json",
+        success: function(response){
+          var result=JSON.parse(JSON.stringify(response));
+          if(result.status==1){
+            alert(result.msg);
+            handleitems(result.items);
+          }else if(result.status==0){
+           var items=result.items;
+            document.getElementById("totalPage").innerHTML=result.page;
+      	    handleitems(items);
+          }
+        },
+        error: function(response){
+          var result=JSON.parse(JSON.stringify(response));
+            alert(result.msg);
+            
+        }
+      });
+}
+
+
+
+function handleitems(items){ 
+  emptyTable("tbl_consultant");
+  for(var i=0;i<items.length;i++){
+    var item=items[i];
+    var newRow = "<tr><td>"+item.consultantno+"</td><td>"+item.name+"</td><td>"+item.customercount+"</td><td>"+item.completecustomer+"</td><td>"+item.completerate+"</td><td>"+item.monthlyincrease+"</td><td>"+item.monthlycomplete+"</td><td>"+item.monthlyvisit+"</td></tr>";
+    $("#tbl_consultant tr:last").after(newRow);
+  }
+}
+
+function initDistrict(){
+     var accountid=document.getElementById("accountid").value;
+     
+     $.ajax({
+          type:'GET',
+          contentType:'application/json',
+          url:"/kingstone/group/groups?accountid="+accountid,
+          dataType: "json",
+          success: function(response){
+            var result=JSON.parse(JSON.stringify(response));
+            if(result.status==1){
+            handledistrict(result.items);
+            }else if(result.status==0){
+             var items=result.items;
+             handledistrict(result.items);
+            }
+          },
+          error: function(response){
+            var result=JSON.parse(JSON.stringify(response));
+              alert(result.msg);
+              
+          }
+        });
+}
+
+function handledistrict(items){
+  
+  var dis=document.getElementById("district");
+  dis.options.length=items.length+1;
+  //var ORyear = document.getElementById('RYear');
+  for(i=0;i<items.length;i++)
+  {
+   dis.options[i+1].value=items[i].id;
+   dis.options[i+1].text=items[i].name;
+  }
+}
+
+
+function initMenu(){
+     var accountid=document.getElementById("accountid").value;
+     
+     $.ajax({
+          type:'GET',
+          contentType:'application/json',
+          url:"/kingstone/group/initmenu?accountid="+accountid,
+          dataType: "json",
+          success: function(response){
+            var result=JSON.parse(JSON.stringify(response));
+            if(result.status==1){
+              alert(result.msg);
+            handlemenu(result.items);
+            }else if(result.status==0){
+             var items=result.items;
+             handlemenu(result.items);
+            }
+          },
+          error: function(response){
+            var result=JSON.parse(JSON.stringify(response));
+              alert(result.msg);
+              
+          }
+        });
+}
+
+function handlemenu(items){
+  
+  var menuli=$("#menu");
+  menuli.html("");
+  var li="";
+   
+  for(i=0;i<items.length;i++)
+  {
+    if(items[i].value=="chart_all.html"){
+      
+    li+="<li class=\"select\"><a href=\"javascript:turnpage('"+items[i].value+"');\">"+items[i].key+"</a></li>"; 
+    }else{
+      li+="<li><a href=\"javascript:turnpage('"+items[i].value+"');\">"+items[i].key+"</a></li>"; 
+    }
+  }
+  menuli.html(li);
+}
+
+
+ 
+
+$(function(){
+  
+  var accountid=GetQueryString('accountid');
+  if(accountid==null||accountid==""){
+    alert("请先登录!");
+    window.location.href="login.html";
+    return;
+  }
+  document.getElementById("accountid").value=accountid;
+  workforce(1);
+  initDistrict();
+  initMenu();
+  document.getElementById("pageNo").value=1;
+})
+
+function emptyTable(tableid){
+  var trslength= $("#"+tableid).find("tr").length;
+  for(var i=trslength;i>=1;i--) //保留最前面两行！
+  {
+      $("#"+tableid).find("tr").eq(i).remove();
+  }
+}
+
+function nextPage(){
+  var pageNo=document.getElementById("pageNo").value;
+  var nextPage=parseInt(pageNo)+1;
+  var totalPage=document.getElementById("totalPage").innerHTML;
+  if(parseInt(totalPage)>=nextPage){
+    document.getElementById("currentPage").innerHTML=nextPage;
+    workforce(nextPage);
+  }
+}
+function prePage(){
+  var pageNo=document.getElementById("pageNo").value;
+  var prePage=parseInt(pageNo)-1;
+  var totalPage=document.getElementById("totalPage").innerHTML;
+  if(parseInt(prePage)>0&&parseInt(totalPage)>0){
+    document.getElementById("currentPage").innerHTML=prePage;
+    workforce(prePage);
+  }
+}
+
+function GetQueryString(name) 
+{ 
+var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)"); 
+var r = window.location.search.substr(1).match(reg); 
+if (r!=null) return unescape(r[2]); return null; 
+}  
+
+ 
+
+ 
+
+function turnpage(page){
+  var accountid=$("#accountid").val();
+  
+  window.location.href=page+"?accountid="+accountid;
+}
+
+
+ 
+
+
+</script>
+</body>
+</html>

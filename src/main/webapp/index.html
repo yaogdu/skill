@@ -1,0 +1,353 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>理财后台管理</title>
+<link href="lib/bootstrap/css/bootstrap.css" rel="stylesheet">
+<link href="lib/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/style.css" type="text/css" rel="stylesheet" />
+
+
+</head>
+
+<body>
+<input type="hidden" id="accountid"/>
+<input type="hidden" id="pageNo" value="1"/>
+<input type="hidden" id="consultantid" value=""/>
+
+  <div class="finance_head">
+    <img src="images/finance_logo.jpg" />
+    <ul id="menu">
+      <li class="select"><a href="javascript:turnpage('index.html');">顾问列表</a></li> 
+      <li><a href="javascript:turnpage('system_adduser.html');">渠道管理</a></li>
+      <li><a href="javascript:turnpage('chart_all.html');">统计分析</a></li>
+      <li><a href="javascript:turnpage('account.html');">账号管理</a></li>
+    </ul>
+    <span id="loginid"><a href="login.html" target="_self">[退出]</a></span>
+  </div>
+  <div class="finance_body">
+   <div id="userop" class="finance_chart_class cle">
+      <a href="javascript:turnpage('index.html');" class="in_but select">顾问列表</a>
+      <a href="javascript:turnpage('customerinfo.html');" class="in_but">客户列表</a>
+    </div>
+    <h1>顾问列表</h1>
+   
+      <div class="finance_search">
+        <p>
+          <label for="key">姓名：</label> <input type="text" size="22" id="name"  placeholder="姓名" />
+        </p>
+        <p>
+          <label>渠道：</label> <select id="district">
+            <option value=-1>全部</option>
+            <option value=0>上海</option>
+            <option value=1>香港</option>
+          </select>
+        </p>
+        <p>
+          <label>职位：</label> <select id="title">
+          <option value=-1>全部</option>
+              <option value=0>技术总监</option>
+                    <option value=1>首席理财师</option>
+                    <option value=2>资深理财师</option>
+                    <option value=3>理财师</option>
+                    <option value=4>助理理财师</option> 
+          </select>
+        </p>
+        <div>
+          <input type="button" value="搜索" id="search" class="in_but" onclick="javascript:consultants(1);" />
+        </div>
+      </div>
+    
+    <table id="tbl_consultant" border="0" cellspacing="1" cellpadding="0" class="finance_list table-hover" align="center">
+      <tr>
+        <th>编号</th>
+        <th>姓名</th>
+        <th>职位</th>
+        <th>特长</th>
+        <th>性别</th>
+        <th>操作</th>
+      </tr>
+      
+      
+    </table>
+    <div class="finance_page">
+       
+      <div class="finance_page_r">
+       <a class="n" href="javascript:prePage();">&lt;上一页</a> <strong>第<span id="currentPage">1</span>页</strong> <strong>共<span id="totalPage">1</span>页</strong><a class="n" href="javascript:nextPage();">下一页&gt;</a>
+      </div>
+    </div>
+  </div>
+  <div class="finance_foot">COPYRIGHT© 2013 景淳投资管理</div>
+
+  <!-- password -->
+  <div id="password" class="modal hide fade text-left" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <span class="lead" id="consultantname">修改的密码</span>
+    </div>
+    <div class="modal-body">
+      <form class="form-horizontal">
+        <div class="control-group">
+          <label class="control-label">新密码</label>
+          <div class="controls">
+            <input type="password" id="pass"/>
+          </div>
+          
+           <label class="control-label">确认密码</label>
+          <div class="controls">
+            <input type="password" id="repass"/>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+      <button class="btn btn-primary" onclick="javascript:resetconsultantpass();">保存</button>
+    </div>
+  </div>
+
+<script type="text/javascript" src="lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="lib/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+
+function consultants(pageNo){
+   document.getElementById("pageNo").value=pageNo;
+   document.getElementById("currentPage").innerHTML=pageNo;
+   var accountid=document.getElementById("accountid").value;
+   var name=$("#name").val();
+   var district=$("#district").val();
+   
+   $.ajax({
+        type:'GET',
+        contentType:'application/json',
+        url:"/kingstone/group/consultants?accountid="+accountid+"&pageNo="+pageNo+"&pageSize=10&district="+district+"&name="+encodeURI(name)+"&title="+$("#title").val(),
+        dataType: "json",
+        success: function(response){
+          var result=JSON.parse(JSON.stringify(response));
+          if(result.status==1){
+            alert(result.msg);
+        	handleitems(result.items);
+          }else if(result.status==0){
+           var items=result.items;
+           document.getElementById("totalPage").innerHTML=result.page;
+		   handleitems(items);
+          }
+        },
+        error: function(response){
+          var result=JSON.parse(JSON.stringify(response));
+            alert(result.msg);
+            
+        }
+      });
+}
+
+function showPassDialog(id,name){
+	
+	document.getElementById("consultantid").value=id;
+	document.getElementById("consultantname").innerHTML='修改'+name+'的密码';
+	$('#password').modal('show');
+}
+
+function handleitems(items){ 
+	emptyTable("tbl_consultant");
+	
+	
+	for(var i=0;i<items.length;i++){
+		var item=items[i];
+		var gender=item.gender==0?"男":"女";
+		  
+		var newRow = "<tr><td>"+item.consultantno+"</td><td>"+item.name+"</td><td>"+item.title+"</td><td>"+item.feature+"</td><td>"+gender+"</td><td><a href=\"javascript:info('"+item.id+"');\">详细</a> <a href=\"javascript:modify('"+item.id+"');\">修改</a> <a href=\"javascript:map('"+item.id+"');\">活动轨迹</a> <a class=\"showpawd\" href=\"javascript:showPassDialog('"+item.id+"','"+item.name+"');\" >修改密码</a></td></tr>";
+		$("#tbl_consultant tr:last").after(newRow);
+	}
+}
+
+function initDistrict(){
+	   var accountid=document.getElementById("accountid").value;
+	   
+	   $.ajax({
+	        type:'GET',
+	        contentType:'application/json',
+	        url:"/kingstone/group/groups?accountid="+accountid,
+	        dataType: "json",
+	        success: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	          if(result.status==1){
+	        	handledistrict(result.items);
+	          }else if(result.status==0){
+	           var items=result.items;
+	           handledistrict(result.items);
+	          }
+	        },
+	        error: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	            alert(result.msg);
+	            
+	        }
+	      });
+}
+
+function handledistrict(items){
+	
+	var dis=document.getElementById("district");
+	dis.options.length=items.length+1;
+	//var ORyear = document.getElementById('RYear');
+	for(i=0;i<items.length;i++)
+	{
+	 dis.options[i+1].value=items[i].id;
+	 dis.options[i+1].text=items[i].name;
+	}
+}
+
+
+function initMenu(){
+	   var accountid=document.getElementById("accountid").value;
+	   
+	   $.ajax({
+	        type:'GET',
+	        contentType:'application/json',
+	        url:"/kingstone/group/initmenu?accountid="+accountid,
+	        dataType: "json",
+	        success: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	          if(result.status==1){
+	            alert(result.msg);
+	        	handlemenu(result.items);
+	          }else if(result.status==0){
+	           var items=result.items;
+	           handlemenu(result.items);
+	          }
+	        },
+	        error: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	            alert(result.msg);
+	            
+	        }
+	      });
+}
+
+function handlemenu(items){
+	
+	var menuli=$("#menu");
+	menuli.html("");
+	var li="";
+	 
+	for(i=0;i<items.length;i++)
+	{
+	  if(items[i].value=="index.html"){
+		  
+	  li+="<li class=\"select\"><a href=\"javascript:turnpage('"+items[i].value+"');\">"+items[i].key+"</a></li>"; 
+	  }else{
+		  li+="<li><a href=\"javascript:turnpage('"+items[i].value+"');\">"+items[i].key+"</a></li>"; 
+	  }
+	}
+	menuli.html(li);
+}
+
+
+function info(id){
+	window.location.href="info.html?consultantid="+id+"&accountid="+$("#accountid").val();
+}
+
+function map(id){
+	window.location.href="map.html?consultantid="+id+"&accountid="+$("#accountid").val();
+}
+
+function modify(id){
+	window.location.href="system_edituser.html?consultantid="+id+"&accountid="+$("#accountid").val();
+}
+
+$(function(){
+	
+	var accountid=GetQueryString('accountid');
+	if(accountid==null||accountid==""){
+		alert("请先登录!");
+		window.location.href="login.html";
+		return;
+	}
+	document.getElementById("accountid").value=accountid;
+	consultants(1);
+	initDistrict();
+	initMenu();
+	document.getElementById("pageNo").value=1;
+})
+
+function emptyTable(tableid){
+	var trslength= $("#"+tableid).find("tr").length;
+	for(var i=trslength;i>=1;i--) //保留最前面两行！
+	{
+	    $("#"+tableid).find("tr").eq(i).remove();
+	}
+}
+
+function nextPage(){
+	var pageNo=document.getElementById("pageNo").value;
+	var nextPage=parseInt(pageNo)+1;
+	var totalPage=document.getElementById("totalPage").innerHTML;
+	if(parseInt(totalPage)>=nextPage){
+		document.getElementById("currentPage").innerHTML=nextPage;
+		consultants(nextPage);
+	}
+}
+function prePage(){
+	var pageNo=document.getElementById("pageNo").value;
+	var prePage=parseInt(pageNo)-1;
+	var totalPage=document.getElementById("totalPage").innerHTML;
+	if(parseInt(prePage)>0&&parseInt(totalPage)>0){
+		document.getElementById("currentPage").innerHTML=prePage;
+		consultants(prePage);
+	}
+}
+
+function GetQueryString(name) 
+{ 
+var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)"); 
+var r = window.location.search.substr(1).match(reg); 
+if (r!=null) return unescape(r[2]); return null; 
+}  
+
+ 
+
+function resetconsultantpass(){
+	var pass=$("#pass").val();
+	var repass=$("#repass").val();
+    if(pass!=repass){
+    	alert("两次密码不一致.");
+    	return;
+    }else{
+    $.ajax({
+        type: 'POST',
+        contentType: 'application/json',
+        url: "/kingstone/account/resetconsultantpass",
+        dataType: "json",
+        data: JSON.stringify({
+        	"id":$("#consultantid").val(),
+        	"password":$("#pass").val()
+        	 
+   	        }),
+        success: function(response){
+        	 var result=JSON.parse(JSON.stringify(response));
+        	 alert(result.msg);
+        	 $('#password').modal('hide');
+            
+        },
+        error: function(response){
+        	 var result=JSON.parse(JSON.stringify(response));
+        	 alert(result.msg);
+        }
+    });
+    }
+}
+
+function turnpage(page){
+	var accountid=$("#accountid").val();
+	
+	window.location.href=page+"?accountid="+accountid;
+}
+
+
+ 
+
+
+</script>
+</body>
+</html>

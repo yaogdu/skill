@@ -1,0 +1,411 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type"  content="text/html; charset=utf-8">
+<title>理财后台管理</title>
+<link href="lib/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+
+
+<link href="lib/bootstrap/css/bootstrap.css" rel="stylesheet">
+<link href="css/style.css" type="text/css" rel="stylesheet" />
+<link href="lib/plugins/css/jquery.jqplot.css" type="text/css" rel="stylesheet" />
+
+<link href="lib/jqueryui/css/jquery.ui.theme.css" type="text/css" rel="stylesheet" />
+<link href="lib/jqueryui/css/jquery.ui.core.css" type="text/css" rel="stylesheet" />
+<link href="lib/jqueryui/css/jquery.ui.datepicker.css" type="text/css" rel="stylesheet" />
+<link href="lib/jqueryui/css/jquery.ui.all.css" type="text/css" rel="stylesheet">
+</head>
+
+<body>
+
+<div class="finance_head">
+	<img src="images/finance_logo.jpg" />
+	<ul id="menu">
+        <li class="select"><a href="javascript:turnpage('index.html')">顾问列表</a></li> 
+        <li><a href="javascript:turnpage('system_adduser.html')">渠道管理</a></li>
+        <li><a href="javascript:turnpage('chart_all.html');">统计分析</a></li>
+        <li><a href="javascript:turnpage('account.html')">账号管理</a></li>
+    </ul>
+    <span><a href="login.html" target="_self">[退出]</a></span>
+</div>
+<input type="hidden" id="accountid"/>
+<input type="hidden" id="pageNo" value="1"/>
+<input type="hidden" id="customerid" value=""/>
+<div class="finance_info_body">
+	<div class="finance_basic cle">
+        <ul> 
+            <li><span id="hidecustomername" class="lead"></span> <span id="customerinfo" ></span></li>
+            <li><span  class="muted">邮箱：</span> <span id="email"></span></li>
+            <li><span  class="muted">电话：</span><span id="mobile"></span></li>
+             <li><span  class="muted">来源：</span><span id="src"></span></li>
+            <li><span  class="muted">录入时间：</span><span id="generatetime"></span></li>
+            <li><span  class="muted">是否成交：</span><span id="done"></span></li>
+            <li><span  class="muted">紧急联系人：</span><span id="contact"></span></li>
+            <li><span  class="muted">联系人电话：</span><span id="contactphone"></span></li>
+            
+            <li><span  class="muted">出生年月：</span><span id="age"></span></li>
+            <li><span  class="muted">行业：</span><span id="job"></span></li>
+            <li><span  class="muted">婚姻状况：</span><span id="married"></span></li>
+            <li><span  class="muted">地址：</span><span id="address"></span></li>
+            <li><span  class="muted">家庭成员：</span><span id="familymember"></span></li>
+            <li id="matenameid"><span  class="muted">配偶姓名：</span><span id="matename"></span></li>
+            <li id="mateageid"><span  class="muted">配偶出生年月：</span><span id="mateage"></span></li>
+            <li><span  class="muted">规划书：</span><span id="document"></span></li>
+            
+            <li><span  class="muted">保密协议：</span><span id="agreementfile"></span></li>
+            <li><span  class="muted">风险偏好：</span><span id="riskfile"></span></li>
+            
+        </ul>
+    </div>
+    <div class="finance_locus">
+    	<h2>拜访记录<span id="totalCount">共 0 次</span> </h2>
+            </div>
+        <table border="0" id="tbl_location" cellspacing="1" cellpadding="0" class="finance_list table-hover" align="center">
+            <tr>
+               
+              <th>拜访时间</th>
+              <th>拜访地点</th>
+             </tr>
+            
+        </table>
+        <div class="finance_page">
+        	
+            <div class="finance_page_r">
+                 <a class="n" href="javascript:prePage();">&lt;上一页</a> <strong>第<span id="currentPage">1</span>页</strong> <strong>共<span id="totalPage">1</span>页</strong><a class="n" href="javascript:nextPage();">下一页&gt;</a>
+            </div>
+        </div>
+    </div>
+      
+   
+</div>
+
+<div class="finance_foot">COPYRIGHT© 2013 景淳投资管理</div>
+
+
+ <!-- confirmdone -->
+  <div id="confirmdone" class="modal hide fade text-left" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <span class="lead" id="consultantname">选择成交时间</span>
+    </div>
+    <div class="modal-body">
+      <form class="form-horizontal">
+        <label for="timefrom">时间选择：</label> <input type="text" id="timefrom" class="input-small" /> 
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+      <button class="btn btn-primary" onclick="javascript:confirmdone();">确定</button>
+    </div>
+  </div>
+
+<script type="text/javascript" src="lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="lib/plugins/js/jquery.jqplot.js" ></script>
+<script type="text/javascript" src="lib/plugins/js/jqplot.pieRenderer.min.js" ></script>
+<script type="text/javascript" src="lib/plugins/js/jqplot.donutRenderer.min.js" ></script>
+
+<script type="text/javascript" src="lib/plugins/js/jqplot.barRenderer.min.js"></script>
+<script type="text/javascript" src="lib/plugins/js/jqplot.highlighter.min.js"></script>
+<script type="text/javascript" src="lib/plugins/js/jqplot.cursor.min.js"></script>
+<script type="text/javascript" src="lib/plugins/js/jqplot.pointLabels.min.js"></script>
+
+<script type="text/javascript" src="lib/plugins/js/jqplot.dateAxisRenderer.min.js"></script>
+
+<script type="text/javascript" src="lib/jqueryui/js/jquery.ui.datepicker.min.js"></script>
+<script type="text/javascript" src="lib/jqueryui/js/jquery.ui.datepicker-zh-CN.min.js"></script>
+<script type="text/javascript" src="lib/jqueryui/js/jquery.ui.core.min.js"></script>
+<script type="text/javascript" src="js/date.select.js"></script>
+
+<script type="text/javascript" src="lib/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+
+function locations(pageNo){
+   document.getElementById("currentPage").value=pageNo;
+   document.getElementById("pageNo").value=pageNo;
+   var customerid=document.getElementById("customerid").value;
+   var accountid=$("#accountid").val();
+   
+   $.ajax({
+        type:'GET',
+        contentType:'application/json',
+        url:"/kingstone/group/visits?accountid="+accountid+"&pageNo="+pageNo+"&pageSize=10&customerid="+customerid,
+        dataType: "json",
+        success: function(response){
+          var result=JSON.parse(JSON.stringify(response));
+          if(result.status==1){
+            alert(result.msg);
+            handleitems(result.items);
+          }else if(result.status==0){
+           var items=result.items;
+           document.getElementById("totalPage").innerHTML=result.page;
+           document.getElementById("totalCount").innerHTML="共"+result.total+"次";
+       	   handleitems(items);
+          }
+        },
+        error: function(response){
+          var result=JSON.parse(JSON.stringify(response));
+            alert(result.msg);
+            
+        }
+      });
+}
+
+function customer(){
+	   var customerid=document.getElementById("customerid").value;
+	   $.ajax({
+	        type:'GET',
+	        contentType:'application/json',
+	        url:"/kingstone/customer/getInfo?customerid="+customerid+"&accountid="+$("#accountid").val(),
+	        dataType: "json",
+	        success: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	          if(result.status==1){
+	            alert(result.msg);
+	          }else if(result.status==0){
+	           var item=result.item;
+	           var gender=item.gender==0?'男':'女';
+               var done="";
+               if(item.done==1){
+            	   done="已成交";
+               }else{
+            	   done="未成交";
+               }
+               var src="";
+               //0,公司提供 1, 转介绍 2, 自行开发
+               if(item.src==0){
+               	src="公司提供";
+               }else if(item.src==1){
+               	src="转介绍";
+               }else if(item.src==2){
+               	src="自行开发";
+               }
+               
+               var married=item.married==0?'已婚':'未婚';
+               
+	           document.getElementById("hidecustomername").innerHTML=item.name;
+	           document.getElementById("customerinfo").innerHTML=" / "+gender+" / "+item.consultantname+"("+item.consultantno+")";
+	          
+	           
+	          document.getElementById("email").innerHTML=item.email==null?"":item.email;
+	          document.getElementById("mobile").innerHTML=item.mobile;
+	          document.getElementById("src").innerHTML=src;
+	          document.getElementById("generatetime").innerHTML=item.generatetime;
+	          document.getElementById("done").innerHTML=done;
+	          document.getElementById("contact").innerHTML=item.contact==null?"":item.contact;
+	          document.getElementById("contactphone").innerHTML=item.contactphone==null?"":item.contactphone;
+	          
+	          
+	          document.getElementById("age").innerHTML=item.age==null?"":item.age;
+	          document.getElementById("job").innerHTML=item.job==null?"":item.job;
+	          document.getElementById("married").innerHTML=married;
+	          document.getElementById("address").innerHTML=item.address==null?"":item.address;
+	          document.getElementById("familymember").innerHTML=item.familymember==null?"":item.familymember;
+	          
+	          
+	          if(item.married==0){
+	        	  document.getElementById("matenameid").style.display="block";
+	        	  document.getElementById("mateageid").style.display="block";
+	        	  document.getElementById("matename").innerHTML=item.matename==null?"":item.matename;
+		          document.getElementById("mateage").innerHTML=item.mateage==null?"":item.mateage;
+	          }else{
+	        	  document.getElementById("matenameid").style.display="none";
+	        	  document.getElementById("mateageid").style.display="none";
+	          }
+	           
+	          var pdfpath=item.pdfpath;
+	          if(pdfpath==null||pdfpath==""){
+	        	  pdfpath="1.pdf";
+	          } 
+	          
+	          var signature=item.signature;
+	          if(signature==null||signature==""){
+	        	  signature="1.pdf";
+	          }
+	          
+	          var risk=item.risk;
+	          
+	          if(risk==null||risk==""){
+	        	  risk="1.pdf";
+	          }
+	          
+	          document.getElementById("document").innerHTML="<a href=\"/kingstone/doc/webdownload/pdfpath/"+pdfpath+"\" target=\"_blank\">下载</a>"
+	          
+	          document.getElementById("agreementfile").innerHTML="<a href=\"/kingstone/doc/webdownload/customersignature/"+signature+"\" target=\"_blank\">下载</a>"
+	        		  
+	          document.getElementById("riskfile").innerHTML="<a href=\"/kingstone/doc/webdownload/risksignature/"+risk+"\" target=\"_blank\">下载</a>"
+	          
+	          }
+	        },
+	        error: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	            alert(result.msg);
+	        }
+	      });
+	}
+
+function showDialog(id){
+  
+  document.getElementById("customerid").value=id;
+  $('#confirmdone').modal('show');
+}
+
+function handleitems(items){ 
+  emptyTable("tbl_location");
+  for(var i=0;i<items.length;i++){
+    var item=items[i];
+     
+  	var newRow = "<tr><td width=\"40%\">"+item.generatetime+"</td><td>"+(item.address==null?"":item.address)+"</td></tr>";
+    $("#tbl_location tr:last").after(newRow);
+   
+    
+  }
+}
+
+function downloadpdf(id){
+	window.open("/kingstone/doc/webdownload?customerid="+id);
+ 	  //  console.log('downloadpdf');
+ 	  //  $.ajax({
+ 	   //    type: 'GET',
+ 	   //    contentType: 'application/pdf',
+ 	   //    url: "/kingstone/doc/webdownload?customerid="+id,
+ 	   //    dataType:"json",
+ 	    //   success: function(response){
+        //		window.open("/kingstone/doc/webdownload?customerid="+id);
+        	 
+ 	    //   },
+ 	    //   error: function(response){
+        //	     alert(response.msg);
+ 	    //   }
+ 	   // });
+}
+
+$(function(){
+  var customerid=GetQueryString('customerid');
+  var accountid=GetQueryString('accountid');
+  document.getElementById("customerid").value=customerid;
+  document.getElementById("accountid").value=accountid;
+  initMenu();
+  customer();
+  locations(1);
+  document.getElementById("pageNo").value=1;
+
+})
+
+function emptyTable(tableid){
+  var trslength= $("#"+tableid).find("tr").length;
+  for(var i=trslength;i>=1;i--) //保留最前面两行！
+  {
+      $("#"+tableid).find("tr").eq(i).remove();
+  }
+}
+
+function nextPage(){
+    
+  
+  var pageNo=document.getElementById("pageNo").value;
+  var nextPage=parseInt(pageNo)+1;
+  var totalPage=document.getElementById("totalPage").innerHTML;
+  if(parseInt(totalPage)>=nextPage){
+    document.getElementById("currentPage").innerHTML=nextPage;
+    customers(nextPage);
+  }
+  
+   
+}
+function prePage(){
+  var pageNo=document.getElementById("pageNo").value;
+  var prePage=parseInt(pageNo)-1;
+  var totalPage=document.getElementById("totalPage").innerHTML;
+  if(parseInt(prePage)>0&&parseInt(totalPage)>0){
+    document.getElementById("currentPage").innerHTML=prePage;
+    customers(prePage);
+  }
+  
+}
+
+function GetQueryString(name) 
+{ 
+var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)"); 
+var r = window.location.search.substr(1).match(reg); 
+if (r!=null) return unescape(r[2]); return null; 
+}  
+ 
+function turnpage(page){
+	var accountid=$("#accountid").val();
+	window.location.href=page+"?accountid="+accountid;
+}
+function initMenu(){
+	   var accountid=document.getElementById("accountid").value;
+	   
+	   $.ajax({
+	        type:'GET',
+	        contentType:'application/json',
+	        url:"/kingstone/group/initmenu?accountid="+accountid,
+	        dataType: "json",
+	        success: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	          if(result.status==1){
+	            alert(result.msg);
+	        	handlemenu(result.items);
+	          }else if(result.status==0){
+	           var items=result.items;
+	           handlemenu(result.items);
+	          }
+	        },
+	        error: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	            alert(result.msg);
+	            
+	        }
+	      });
+}
+
+function handlemenu(items){
+	
+	var menuli=$("#menu");
+	menuli.html("");
+	var li="";
+	 
+	for(i=0;i<items.length;i++)
+	{
+	  if(items[i].value=="index.html"){
+		  
+	  li+="<li class=\"select\"><a href=\"javascript:turnpage('"+items[i].value+"');\">"+items[i].key+"</a></li>"; 
+	  }else{
+		  li+="<li><a href=\"javascript:turnpage('"+items[i].value+"');\">"+items[i].key+"</a></li>"; 
+	  }
+	}
+	menuli.html(li);
+}
+ 
+function confirmdone(customerid){
+	var pass=$("#timefrom").val();
+	 
+    $.ajax({
+        type: 'POST',
+        contentType: 'application/json',
+        url: "/kingstone/group/done",
+        dataType: "json",
+        data: JSON.stringify({
+        	"id":$("#customerid").val(),
+        	"completetime":$("#timefrom").val()
+        	 
+   	        }),
+        success: function(response){
+        	 var result=JSON.parse(JSON.stringify(response));
+        	 customers(document.getElementById("currentPage").innerHTML);
+        	 alert(result.msg);
+        	 $('#confirmdone').modal('hide');
+        	 $("#timefrom").val();
+            
+        },
+        error: function(response){
+        	 var result=JSON.parse(JSON.stringify(response));
+        	 alert(result.msg);
+        }
+    });
+    
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>理财后台管理 </title>
+<link href="lib/bootstrap/css/bootstrap.css" rel="stylesheet">
+<link href="lib/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/style.css" type="text/css" rel="stylesheet" />
+</head>
+
+<body>
+<div class="finance_head">
+	<img src="images/finance_logo.jpg" />
+	<ul id="menu">
+        <li><a href="javascript:turnpage('index.html');">顾问列表</a></li> 
+        <li><a href="javascript:turnpage('system_adduser.html');">渠道管理</a></li>
+         <li><a href="javascript:turnpage('chart_all.html');">统计分析</a></li>
+        <li class="select"><a href="javascript:turnpage('account.html');">账号管理</a></li>
+        
+     
+    </ul>
+    <span><a href="login.html" target="_self">[退出]</a></span>
+</div>
+<div class="finance_body">
+	<h1>修改密码</h1>
+  <input type="hidden" id="accountid"/>
+    <form class="form-horizontal">
+        <div class="control-group">
+            <label class="control-label" >原密码</label>
+            <div class="controls">
+                <input id="password" type="password" />
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label">新密码</label>
+            <div class="controls">
+                <input  id="newpass" type="password" />
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label">确认密码</label>
+            <div class="controls">
+                <input id="repass" type="password" />
+            </div>
+        </div>
+        <div class="control-group">
+            <div class="controls">
+                <input type="button" value="保存" id="btnsave"  class="in_but" />
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="finance_foot">COPYRIGHT© 2013 景淳投资管理</div>
+<script type="text/javascript" src="lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="lib/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/script.js"></script>
+<script type="text/javascript">
+
+function resetpass(){
+	var password=$("#password").val();
+	
+	var newpass=$("#newpass").val();
+	
+	var repass=$("#repass").val();
+	
+	
+	
+	$.ajax({
+		type: 'POST',
+		contentType: 'application/json',
+		url: "/kingstone/account/webresetpass",
+		dataType: "json",
+		data: JSON.stringify({
+			"id":$("#accountid").val(),
+			"password":$("#password").val(),
+			"passwordHash":$("#repass").val()
+			}),
+		success: function(response){
+			var result=JSON.parse(JSON.stringify(response));
+			alert(result.msg);
+			
+			$("input[type='text'],input[type='password'],textarea").val("");
+			
+		},
+		error: function(response){
+			alert(JSON.parse(JSON.stringify(response)).msg);
+		}
+	});
+}
+
+function GetQueryString(name) 
+{ 
+var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)"); 
+var r = window.location.search.substr(1).match(reg); 
+if (r!=null) return unescape(r[2]); return null; 
+}  
+
+
+$(function(){
+    //var consultantid=GetQueryString('consultantid');
+    var accountid=GetQueryString('accountid');
+    //document.getElementById("consultantid").value=consultantid;
+    document.getElementById("accountid").value=accountid;
+    $("#btnsave").click(function(){
+    	resetpass();
+    });
+    initMenu();
+   // route();
+  })
+function turnpage(page){
+  var accountid=$("#accountid").val();
+  window.location.href=page+"?accountid="+accountid;
+}
+
+function initMenu(){
+	   var accountid=document.getElementById("accountid").value;
+	   
+	   $.ajax({
+	        type:'GET',
+	        contentType:'application/json',
+	        url:"/kingstone/group/initmenu?accountid="+accountid,
+	        dataType: "json",
+	        success: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	          if(result.status==1){
+	            alert(result.msg);
+	        	handlemenu(result.items);
+	          }else if(result.status==0){
+	           var items=result.items;
+	           handlemenu(result.items);
+	          }
+	        },
+	        error: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	            alert(result.msg);
+	            
+	        }
+	      });
+}
+
+function handlemenu(items){
+	
+	var menuli=$("#menu");
+	menuli.html("");
+	var li="";
+	 
+	for(i=0;i<items.length;i++)
+	{
+	  if(items[i].value=="account.html"){
+		  
+	  li+="<li class=\"select\"><a href=\"javascript:turnpage('"+items[i].value+"');\">"+items[i].key+"</a></li>"; 
+	  }else{
+		  li+="<li><a href=\"javascript:turnpage('"+items[i].value+"');\">"+items[i].key+"</a></li>"; 
+	  }
+	}
+	menuli.html(li);
+}
+</script>
+</body>
+</html>

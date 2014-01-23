@@ -1,0 +1,644 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>理财后台管理</title>
+<link href="lib/bootstrap/css/bootstrap.css" rel="stylesheet">
+<link href="lib/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/style.css" type="text/css" rel="stylesheet" />
+</head>
+
+<body>
+<div class="finance_head">
+	<img src="images/finance_logo.jpg" />
+	<ul id="menu">
+         <li><a href="javascript:turnpage('index.html');">顾问列表</a></li> 
+        <li class="select"><a href="javascript:turnpage('system_adduser.html');">渠道管理</a></li>
+         <li><a href="javascript:turnpage('chart_all.html');">统计分析</a></li>
+        <li><a href="javascript:turnpage('account.html');">账号管理</a></li>
+    </ul>
+    <span><a href="login.html" target="_self">[退出]</a></span>
+</div>
+<div class="finance_body">
+    <div id="userop" class="finance_chart_class cle">
+    	 
+    </div>
+    <h1>修改组</h1>
+    <form class="form-horizontal">
+    	
+        <input type="hidden" id="accountid"/>
+        <input type="hidden" id="groupid"/>
+        <input type="hidden" id="pageNo" value="1"/>
+        <input type="hidden" id="consultantid" value=""/>
+        <div class="control-group">
+            <label class="control-label" >组名</label>
+            <div class="controls">
+                <input type="text" id="name" />
+            </div>
+        </div>
+         <div class="control-group">
+            <label class="control-label" >地区</label>
+            <div class="controls">
+                <input type="text" id="district"/>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" >组成员</label>
+            <div class="controls">
+                <input type="button" value="选择组员" class="btn btn-primary" id="addMember" />
+                <ul class="member" id="memberspan">
+                </ul>
+                <input type="hidden" value="" id="memberData" />
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" >组长</label>
+            <div class="controls">
+                <input type="button" value="选择组长" class="btn btn-primary" id="selectLeader" />
+                <ul class="leader" id="leaderspan">
+                </ul>
+                <input type="hidden" value="" id="leaderData" />
+            </div>
+        </div>
+        <div class="control-group">
+            <div class="controls">
+                <input type="button" value="保存" class="in_but" onclick="javascript:saveGroup();"/>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="finance_foot">COPYRIGHT© 2013 景淳投资管理</div>
+
+<!-- addMember -->
+<div id="selectMember" class="modal hide fade text-left" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <span class="lead"></span>
+    </div>
+    <div class="modal-body">
+    	 
+            <div class="finance_search" style=" margin:0 auto;">
+                <p>
+                    <label for="key">关键字：</label>
+                    <input type="text" size="22" id="namesearch" class="input-medium" placeholder="姓名" /> 
+                </p>
+                 
+                <div><input type="button" value="搜索" class="in_but" onclick="doSearch();"/></div>
+            </div>
+         
+        <table border="0" cellspacing="1" cellpadding="0" class="finance_list table-hover" align="center"  id="memberList">
+            <tr>
+            	<th>选择</th>
+                <th>姓名</th>
+                <th>编号</th>
+                
+            </tr>
+            <tr>
+            	<td colspan="6">加载中...</td>
+            </tr>
+        </table>
+        <div class="finance_page cle">
+            <div class="finance_page_r">
+                <a class="n" href="javascript:prePage();">&lt;上一页</a> <strong>第<span id="currentPage">1</span>页</strong> <strong>共<span id="totalPage">1</span>页</strong><a class="n" href="javascript:nextPage();">下一页&gt;</a>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+        <button class="btn btn-primary" id="saveMember">确定</button>
+    </div>
+</div>
+
+<table border="0" cellspacing="1" cellpadding="0" class="hide" align="center">
+    <tr>
+        <th>选择</th>
+        <th>姓名</th>
+        <th>编号</th>
+    </tr>
+    
+</table>
+
+ 
+<script type="text/javascript" src="lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="lib/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+//验证表单是否为空
+function formVerification(obj){
+	var text = '<span class="help-inline">请输入内容</span>';
+	$(obj).each(function(i){
+		if(obj.eq(i).val() == "" && !obj.eq(i).next("span")[0]){
+			obj.eq(i).closest("div.control-group").addClass("error");
+			obj.eq(i).after(text);
+		}
+		if(obj.eq(i).val() != ""){
+			obj.eq(i).next("span").remove();
+			obj.eq(i).closest("div.control-group").removeClass("error");
+		}
+	});
+	
+	if($("span.help-inline")[0]){
+		return false;
+	}
+	
+}
+
+//组成员
+var memberval="";
+var leaderval="";
+
+//匹配组成员
+function memberMatch(ed,box,val){
+	var v=val.split(",");
+	if(v[0]){
+		$(v).each(function(i){
+			$(box).each(function(s){
+				if(v[i]== box.eq(s).val()){
+					box.eq(s).attr("checked",true);
+				}
+			})
+		});
+	}
+	//memberval = val;
+}
+
+//匹配组成员
+function leaderMatch(ed,box,val){
+	var v=val.split(",");
+	if(v[0]){
+		$(v).each(function(i){
+			$(box).each(function(s){
+				if(v[i] == box.eq(s).val()){
+					document.getElementById(v[i]).checked=true;
+					//box.eq(s).attr("checked","checked");
+					//$("input[name=test][id="+v[i]+"]").attr("checked",true);//value=34的radio被选中
+					
+				}
+			})
+		});
+	}
+	//leaderval = val;
+}
+
+
+function emptyTable(tableid){
+	var trslength= $("#"+tableid).find("tr").length;
+	for(var i=trslength;i>=1;i--) //保留最前面两行！
+	{
+	    $("#"+tableid).find("tr").eq(i).remove();
+	}
+}
+
+function userList(items){
+	emptyTable("memberList");
+	for(var i=0;i<items.length;i++){
+		var item=items[i];
+		var gender=item.gender==0?"男":"女";
+		  
+		var newRow = "<tr><td><input type=\"checkbox\" onchange=\"javascript:selectbox(this);\" value=\""+item.accountid+"\" /></td><td>"+item.name+"</td><td>"+item.consultantno+"</td></tr>";
+		$("#memberList tr:last").after(newRow);
+	}
+	memberMatch($("ul.member li span"),$("#selectMember input[type='checkbox']"),$("#memberData").val());
+}
+
+
+function leaderList(items){
+	emptyTable("memberList");
+	for(var i=0;i<items.length;i++){
+		var item=items[i];
+		var gender=item.gender==0?"男":"女";
+		  
+		var newRow = "<tr><td><input type=\"radio\" id=\""+item.accountid+"\" onclick=\"javascript:selectradio(this);\" name=\"leader\" value=\""+item.accountid+"\" /></td><td>"+item.name+"</td><td>"+item.consultantno+"</td></tr>";
+		$("#memberList tr:last").after(newRow);
+	}
+	leaderMatch($("ul.leader li span"),$("#selectMember input[type='radio']"),$("#leaderData").val());
+	 
+}
+
+
+
+//保存组成员
+function memberSave(obj,ul){
+	var list = memberval.split(",");
+	var li = "";
+	var id = "";
+	if(memberval != ""){
+		for(var i=0; i<list.length; i++){
+			user = list[i].split("=");
+			li += '<li>'+user[1]+' （<span class="muted">'+user[2]+'</span>）</li>';
+			if(i != list.length-1){
+				id += user[0] + ",";
+			}else{
+				id += user[0];
+			}
+		};
+	}
+	ul.html(li);
+	obj.val(id);
+}
+function leaderSave(obj,ul){
+	var list = leaderval.split(",");
+	var li = "";
+	var id = "";
+	if(leaderval != ""){
+		for(var i=0; i<list.length; i++){
+			user = list[i].split("=");
+			li += '<li>'+user[1]+' （<span class="muted">'+user[2]+'</span>）</li>';
+			if(i != list.length-1){
+				id += user[0] + ",";
+			}else{
+				id += user[0];
+			}
+		};
+	}
+	ul.html(li);
+	obj.val(id);
+}
+
+function selectbox(ele){
+	var obj=$(ele);
+	
+	var s = memberval.split("\,");
+	
+	var objnext=obj.closest("td").next();
+	
+	var name = objnext.text();
+	
+	var no=objnext.closest("td").next().text();
+	var val = obj.val() + "=" + name+"="+no;
+	if(obj.is(":checked")){
+		if(s[0] == ""){
+			memberval = val;
+		}else{
+			memberval = memberval + "," + val;
+		};
+	}else{
+		if(s[0] == val && s[1]){
+			memberval = memberval.replace(val + ",","");
+		}else if(s[0] == val){
+			memberval = memberval.replace(val,"");
+			}else{
+			memberval = memberval.replace("," + val,"");
+		};
+	}
+	memberSave($("#memberData"),$(".member"));
+}
+
+function selectradio(ele){
+	var obj=$(ele);
+	
+	var objnext=obj.closest("td").next();
+	var name = objnext.text();
+	var no=objnext.closest("td").next().text();
+	var val = obj.val() + "=" + name+"="+no;
+	if(obj.is(":checked")){
+		leaderval = val;
+	}
+	leaderSave($("#leaderData"),$(".leader"));
+}
+
+$(function(){
+	
+	 var accountid=GetQueryString('accountid');
+	 document.getElementById("accountid").value=accountid;
+	 var groupid=GetQueryString('groupid');
+	 document.getElementById("groupid").value=groupid;
+	//表单验证
+	$(".finance_body input[type='text'],.finance_bodyinput[type='password'],.finance_body textarea").blur(function(){
+		formVerification($(this));
+	});	
+	initMenu();
+	$("form").submit(function(){
+		var verification = formVerification($(".finance_body input[type='text'],.finance_bodyinput[type='password'],.finance_body textarea"));
+		if(verification == false){
+			return false;
+		}else{
+			return true;
+		}
+		
+		
+	});
+	group();
+	
+})
+
+function group(){
+			 $.ajax({
+			        type:'GET',
+			        contentType:'application/json',
+			        url:"/kingstone/group/groupinfo?groupid="+$("#groupid").val(),
+			        dataType: "json",
+			        success: function(response){
+			          var result=JSON.parse(JSON.stringify(response));
+			          if(result.status==1){
+			            alert(result.msg);
+			            $("#name").val(result.group.name);
+				        $("#district").val(result.group.ditrict);
+			        	handlegroup(result.group);
+			        	handlemembers(result.items);
+			          }else if(result.status==0){
+			           var items=result.items;
+			           $("#name").val(result.group.name);
+			           $("#district").val(result.group.district);
+			           handlegroup(result.group);
+			           handlemembers(result.items);
+			          }
+			        },
+			        error: function(response){
+			          var result=JSON.parse(JSON.stringify(response));
+			            alert(result.msg);
+			        }
+			 });
+	 
+	}
+	
+	function handlegroup(group){
+		 
+		leaderval = group.leaderid + "=" + group.leadername+"="+group.leaderno;
+		 
+		var list = leaderval.split(",");
+		var li = "";
+		var id = "";
+		if(leaderval != ""){
+			for(var i=0; i<list.length; i++){
+				user = list[i].split("=");
+				li += '<li>'+user[1]+' （<span class="muted">'+user[2]+'</span>）</li>';
+				if(i != list.length-1){
+					id += user[0] + ",";
+				}else{
+					id += user[0];
+				}
+			};
+		}
+		$("#leaderspan").html(li);
+		$("#leaderData").val(id);
+		
+	}
+	
+	
+	function handlemembers(members){
+		 
+		
+		for(var i=0;i<members.length;i++){
+			
+		memberval += members[i].accountid + "=" + members[i].name+"="+members[i].consultantno+",";
+		}
+		
+		memberval=memberval.substring(0,memberval.length-1);
+		
+		
+		var list = memberval.split(",");
+		var li = "";
+		var id = "";
+		if(memberval != ""){
+			for(var i=0; i<list.length; i++){
+				user = list[i].split("=");
+				li += '<li>'+user[1]+' （<span class="muted">'+user[2]+'</span>）</li>';
+				if(i != list.length-1){
+					id += user[0] + ",";
+				}else{
+					id += user[0];
+				}
+			};
+		}
+		
+		$("#memberspan").html(li);
+		$("#memberData").val(id);
+		
+	}
+	//选择组员
+	$("#addMember").click(function(){
+		$("#namesearch").val("");
+		members(1);
+		//userList($("#memberList"));
+		memberMatch($("ul.member li span"),$("#selectMember input[type='checkbox']"),$("#memberData").val());
+		$("#selectMember input[type='checkbox']").bind("change",function(){
+			selectbox($(this));
+		})
+		$('#selectMember span.lead').text("添加组员");
+		$('#selectMember').modal('show');
+		$("#saveMember").one("click",function(){
+			memberSave($("#memberData"),$(".member"));
+			$('#selectMember').modal('hide');
+		});
+	});
+	
+	
+	//选择组长
+	$("#selectLeader").click(function(){
+		//userList($("#leaderList"));
+		$("#namesearch").val("");
+		leaders(1);
+		leaderMatch($("ul.leader li span"),$("#selectMember input[type='radio']"),$("#leaderData").val());
+		$('#selectMember span.lead').text("选择组长");
+		$("#selectMember input[type='radio']").bind("change",function(){
+			selectradio($(this));
+		})
+		$('#selectMember').modal('show');
+		$("#saveMember").one("click",function(){
+			leaderSave($("#leaderData"),$(".leader"));
+			$('#selectMember').modal('hide');
+		});
+	})
+
+function GetQueryString(name) 
+{ 
+var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)"); 
+var r = window.location.search.substr(1).match(reg); 
+if (r!=null) return unescape(r[2]); return null; 
+}  
+ function members(pageNo){
+	 pagetype=0;
+	 
+	 document.getElementById("currentPage").innerHTML=pageNo;
+	 document.getElementById("pageNo").value=pageNo;
+	 $.ajax({
+	        type:'GET',
+	        contentType:'application/json',
+	        url:"/kingstone/consultant/weblist?pageNo="+pageNo+"&pageSize=5&name="+encodeURI($("#namesearch").val()),
+	        dataType: "json",
+	        success: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	          if(result.status==1){
+	            alert(result.msg);
+	        	userList(result.items);
+	          }else if(result.status==0){
+	           var items=result.items;
+	           document.getElementById("totalPage").innerHTML=result.page;
+	           userList(items);
+	          }
+	        },
+	        error: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	            alert(result.msg);
+	        }
+	       
+	 });
+	 document.getElementById("pageNo").value=pageNo;
+}
+ 
+ 
+function leaders(pageNo){
+     pagetype=1;
+	 document.getElementById("currentPage").innerHTML=pageNo;
+	 document.getElementById("pageNo").value=pageNo;
+	 $.ajax({
+	        type:'GET',
+	        contentType:'application/json',
+	        url:"/kingstone/consultant/weblist?pageNo="+pageNo+"&pageSize=5&name="+encodeURI($("#namesearch").val()),
+	        dataType: "json",
+	        success: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	          if(result.status==1){
+	            alert(result.msg);
+	            leaderList(result.items);
+	          }else if(result.status==0){
+	           var items=result.items;
+	           document.getElementById("totalPage").innerHTML=result.page;
+	           leaderList(items);
+	          }
+	        },
+	        error: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	            alert(result.msg);
+	        }
+	 });
+	 document.getElementById("pageNo").value=pageNo;
+}
+ 
+
+function turnpage(page){
+	var accountid=$("#accountid").val();
+	window.location.href=page+"?accountid="+accountid;
+}
+ 
+function nextPage(){
+	var pageNo=document.getElementById("pageNo").value;
+	var nextPage=parseInt(pageNo)+1;
+	var totalPage=document.getElementById("totalPage").innerHTML;
+	if(parseInt(totalPage)>=nextPage){
+		document.getElementById("currentPage").innerHTML=nextPage;
+		if(pagetype==0){
+			members(nextPage);
+		}else{
+			
+			leaders(nextPage);
+		}
+	}
+}
+
+var pagetype=0;//member , 1=leader
+function prePage(){
+	var pageNo=document.getElementById("pageNo").value;
+	var prePage=parseInt(pageNo)-1;
+	var totalPage=document.getElementById("totalPage").innerHTML;
+	if(parseInt(prePage)>0&&parseInt(totalPage)>0){
+		document.getElementById("currentPage").innerHTML=prePage;
+		if(pagetype==0){
+			members(prePage);
+		}else{
+			leaders(prePage);
+		}
+	}
+}
+
+function doSearch(){
+	if(pagetype==0){
+		members(1);
+	}else{
+		leaders(1);
+	}
+}
+
+function saveGroup(){
+	 
+	$.ajax({
+		type: 'POST',
+		contentType: 'application/json',
+		url: "/kingstone/group/editgroup",
+		dataType: "json",
+		data: JSON.stringify({
+			"id":$("#groupid").val(),
+			"name":$("#name").val(),
+			"leader":{"id":$("#leaderData").val()},
+			"district":$("#district").val(),
+			"member":$("#memberData").val()
+			}),
+		success: function(response){
+			var result=JSON.parse(JSON.stringify(response));
+			alert(result.msg);
+			//if(result.status==0){
+			//$("input[type='text'],input[type='password'],textarea").val("");
+			//}
+			//$("#memberspan").html("");
+			//$("#leaderspan").html("");
+			//memberval="";
+		},
+		error: function(response){
+			alert(JSON.parse(JSON.stringify(response)).msg);
+		}
+	});
+}
+function initMenu(){
+	   var accountid=document.getElementById("accountid").value;
+	   
+	   $.ajax({
+	        type:'GET',
+	        contentType:'application/json',
+	        url:"/kingstone/group/initmenu?accountid="+accountid,
+	        dataType: "json",
+	        success: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	          if(result.status==1){
+	            alert(result.msg);
+	        	handlemenu(result.items);
+	          }else if(result.status==0){
+	        	  var item=result.item;
+	        	  handleuserop(item);
+	           var items=result.items;
+	           handlemenu(result.items);
+	          }
+	        },
+	        error: function(response){
+	          var result=JSON.parse(JSON.stringify(response));
+	            alert(result.msg);
+	            
+	        }
+	      });
+}
+
+function handleuserop(item){
+	var level=item.level;
+	
+	if(level==0){
+		var userop="<a href=\"javascript:turnpage('system_adduser.html');\" class=\"in_but select\">添加用户</a>";
+		userop+=" <a href=\"javascript:turnpage('system_group.html');\" class=\"in_but\">群组管理</a>";
+		$("#userop").html(userop);
+		
+		//var groupop="<a href=\"javascript:turnpage('system_group_add.html');\">添加组</a>";
+		//$("#groupop").html(groupop);
+	}
+}
+
+function handlemenu(items){
+	
+	var menuli=$("#menu");
+	menuli.html("");
+	var li="";
+	 
+	for(i=0;i<items.length;i++)
+	{
+	  if(items[i].value=="system_group.html"){
+		  
+	  li+="<li class=\"select\"><a href=\"javascript:turnpage('"+items[i].value+"');\">"+items[i].key+"</a></li>"; 
+	  }else{
+		  li+="<li><a href=\"javascript:turnpage('"+items[i].value+"');\">"+items[i].key+"</a></li>"; 
+	  }
+	}
+	menuli.html(li);
+}
+
+</script>
+
+</body>
+</html>
